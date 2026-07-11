@@ -209,9 +209,59 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   .filters select, .filters input{ flex:1; }
 }
 @media (max-width: 480px){ .kpi-grid{ grid-template-columns:1fr; } .urgency-group{ flex-direction:column; } }
+
+/* ============ Login gate ============ */
+.auth-overlay{
+  position:fixed; inset:0; z-index:9999;
+  background:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.auth-overlay[hidden]{ display:none; }
+.auth-card{
+  background:var(--paper-raised);
+  border-radius:var(--radius);
+  padding:36px 32px;
+  width:100%; max-width:360px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+}
+.auth-card .mark{
+  font-family:var(--font-display); font-size:24px; font-weight:600;
+  color:var(--ink); display:flex; align-items:baseline; gap:8px; margin-bottom:4px;
+}
+.auth-card .mark .dot{ width:8px;height:8px;border-radius:50%; background:var(--amber); display:inline-block; }
+.auth-card .sub{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:24px; }
+.auth-card .form-field{ margin-bottom:14px; }
+.auth-card .form-field label{ font-size:12.5px; font-weight:600; color:var(--ink); display:block; margin-bottom:6px; }
+.auth-card .form-field input{
+  width:100%; font-family:var(--font-body); font-size:14px; padding:10px 12px;
+  border-radius:var(--radius-sm); border:1px solid var(--line-strong); background:var(--paper); color:var(--text); outline:none;
+}
+.auth-card .form-field input:focus{ border-color:var(--verdigris); background:var(--paper-raised); }
+.auth-error{ font-size:12.5px; color:var(--rust); min-height:16px; margin-bottom:10px; }
+.auth-card .btn{ width:100%; justify-content:center; }
 </style>
 </head>
 <body>
+
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card">
+    <div class="mark"><span class="dot"></span>Ash Procurement</div>
+    <div class="sub">Please log in</div>
+    <form id="auth-form">
+      <div class="form-field">
+        <label>User ID</label>
+        <input type="text" name="username" autocomplete="username" required>
+      </div>
+      <div class="form-field">
+        <label>Password</label>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <button type="submit" class="btn btn-primary">Log in</button>
+    </form>
+  </div>
+</div>
 
 <div class="app-shell">
 
@@ -259,6 +309,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
       <div class="topbar-user">
         <div class="who"><strong>Ash</strong><span>Procurement Lead</span></div>
         <div class="avatar">AS</div>
+        <button class="btn btn-outline btn-sm" id="logout-btn" style="margin-left:8px;">Log out</button>
       </div>
     </header>
 
@@ -770,6 +821,11 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
           <label>Phone</label>
           <input type="text" name="phone" placeholder="(555) 000-0000">
         </div>
+        <div class="form-field full">
+          <label>Store photo</label>
+          <input type="file" name="imageFile" id="store-image-file" accept="image/*">
+          <div class="upload-status" id="store-image-status"></div>
+        </div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancel-add-store">Cancel</button>
@@ -888,6 +944,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* ============================================================
@@ -901,7 +958,98 @@ function formatINR(n){ return '₹' + Number(n).toLocaleString('en-IN', { maximu
 function formatDate(iso){ const d = new Date(iso); return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
 
 /* ============================================================
-   CLOUDINARY — unsigned upload for order invoices / proof-of-receivable
+   SUPABASE — backend database (replaces localStorage as the source of truth
+   once configured). Fill these in from your Supabase project:
+   1. Create a free project at supabase.com
+   2. SQL Editor → run schema.sql (in your repo) once
+   3. Settings → API → copy the Project URL and anon public key below
+   Until these are filled in, the app quietly keeps working on
+   localStorage only (nothing breaks — it just won't sync across devices).
+   ============================================================ */
+const SUPABASE_CONFIG = {
+  url: 'YOUR_SUPABASE_PROJECT_URL',     // e.g. https://abcxyzproject.supabase.co
+  anonKey: 'YOUR_SUPABASE_ANON_KEY'     // Settings → API → anon public
+};
+const CLOUD_ENABLED = SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_PROJECT_URL' && SUPABASE_CONFIG.anonKey !== 'YOUR_SUPABASE_ANON_KEY';
+const cloud = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
+
+/* ---- row <-> app-object mappers (Postgres uses snake_case, the app uses camelCase) ---- */
+const cloudMap = {
+  vendors: {
+    toRow: v => ({ name:v.name, category:v.category, contact:v.contact, email:v.email, phone:v.phone, rating:v.rating, status:v.status, total_spend:v.totalSpend }),
+    fromRow: r => ({ id:r.id, name:r.name, category:r.category, contact:r.contact, email:r.email, phone:r.phone, rating:Number(r.rating), status:r.status, totalSpend:Number(r.total_spend) })
+  },
+  stores: {
+    toRow: s => ({ name:s.name, address:s.address, contact:s.contact, phone:s.phone, status:s.status, image_url:s.imageUrl || null }),
+    fromRow: r => ({ id:r.id, name:r.name, address:r.address, contact:r.contact, phone:r.phone, status:r.status, imageUrl:r.image_url })
+  },
+  purchase_history: {
+    toRow: h => ({ po_number:h.poNumber, vendor:h.vendor, store:h.store, item:h.item, department:h.department, amount:h.amount, purchase_date:h.date, status:h.status }),
+    fromRow: r => ({ id:r.id, poNumber:r.po_number, vendor:r.vendor, store:r.store, item:r.item, department:r.department, amount:Number(r.amount), date:r.purchase_date, status:r.status })
+  },
+  orders: {
+    toRow: o => ({ order_number:o.orderNumber, vendor:o.vendor, store:o.store, item:o.item, quantity:o.quantity, amount:o.amount, order_date:o.date, status:o.status, payment_status:o.paymentStatus, invoice_url:o.invoiceUrl || null, proof_url:o.proofUrl || null }),
+    fromRow: r => ({ id:r.id, orderNumber:r.order_number, vendor:r.vendor, store:r.store, item:r.item, quantity:Number(r.quantity), amount:Number(r.amount), date:r.order_date, status:r.status, paymentStatus:r.payment_status, invoiceUrl:r.invoice_url, proofUrl:r.proof_url })
+  },
+  consumables: {
+    toRow: c => ({ store:c.store, item:c.item, category:c.category, quantity:c.quantity, unit:c.unit, reorder_level:c.reorderLevel }),
+    fromRow: r => ({ id:r.id, store:r.store, item:r.item, category:r.category, quantity:Number(r.quantity), unit:r.unit, reorderLevel:Number(r.reorder_level) })
+  }
+};
+
+// Pushes the FULL current array for a table up to Supabase (replace-all-rows).
+// This matches how the app already works locally — every add/edit/import re-saves
+// the whole array to localStorage — so mirroring that same "whole array" model to
+// the cloud keeps things simple and avoids needing per-row update/delete tracking.
+// Debounced so rapid successive saves don't hammer the database.
+const cloudSyncTimers = {};
+function pushToCloud(table, rows){
+  if(!cloud) return;
+  clearTimeout(cloudSyncTimers[table]);
+  cloudSyncTimers[table] = setTimeout(async ()=>{
+    try{
+      const { error: delErr } = await cloud.from(table).delete().not('id', 'is', null);
+      if(delErr) throw delErr;
+      if(rows.length){
+        const { error: insErr } = await cloud.from(table).insert(rows.map(cloudMap[table].toRow));
+        if(insErr) throw insErr;
+      }
+    }catch(err){
+      console.error('Cloud sync failed for ' + table, err);
+      showToast('Could not sync "' + table.replace('_',' ') + '" to the cloud — check your connection.', 'error');
+    }
+  }, 500);
+}
+
+// Fetches everything from Supabase and mirrors it into localStorage, so the rest
+// of the app (which reads/writes localStorage synchronously) works completely
+// unchanged. Runs once at startup, and again whenever another device/tab changes
+// something (via the realtime subscription set up in the INIT block below).
+async function bootstrapFromCloud(){
+  if(!cloud) return;
+  try{
+    const [v, s, h, o, c] = await Promise.all([
+      cloud.from('vendors').select('*').order('created_at', { ascending:false }),
+      cloud.from('stores').select('*').order('created_at', { ascending:false }),
+      cloud.from('purchase_history').select('*').order('purchase_date', { ascending:false }),
+      cloud.from('orders').select('*').order('order_date', { ascending:false }),
+      cloud.from('consumables').select('*').order('updated_at', { ascending:false })
+    ]);
+    const firstError = v.error || s.error || h.error || o.error || c.error;
+    if(firstError) throw firstError;
+    localStorage.setItem(STORE_KEYS.vendors, JSON.stringify(v.data.map(cloudMap.vendors.fromRow)));
+    localStorage.setItem(STORE_KEYS.stores, JSON.stringify(s.data.map(cloudMap.stores.fromRow)));
+    localStorage.setItem(STORE_KEYS.history, JSON.stringify(h.data.map(cloudMap.purchase_history.fromRow)));
+    localStorage.setItem(STORE_KEYS.orders, JSON.stringify(o.data.map(cloudMap.orders.fromRow)));
+    localStorage.setItem(STORE_KEYS.consumables, JSON.stringify(c.data.map(cloudMap.consumables.fromRow)));
+  }catch(err){
+    console.error('Could not load from Supabase — showing local data instead.', err);
+    showToast('Could not reach the cloud database — showing local data instead.', 'error');
+  }
+}
+
+/* ============================================================
+   CLOUDINARY — unsigned upload for store photos, order invoices, and proof-of-receivable
    Fill these in with your own Cloudinary account before uploads will work:
    1. Create a free account at cloudinary.com
    2. Settings → Upload → Add an "Unsigned" upload preset, copy its name below
@@ -1002,15 +1150,15 @@ function seedIfNeeded(){
   localStorage.setItem(STORE_KEYS.seeded, '1');
 }
 function getVendors(){ return JSON.parse(localStorage.getItem(STORE_KEYS.vendors) || '[]'); }
-function saveVendors(v){ localStorage.setItem(STORE_KEYS.vendors, JSON.stringify(v)); }
+function saveVendors(v){ localStorage.setItem(STORE_KEYS.vendors, JSON.stringify(v)); pushToCloud('vendors', v); }
 function getStores(){ return JSON.parse(localStorage.getItem(STORE_KEYS.stores) || '[]'); }
-function saveStores(s){ localStorage.setItem(STORE_KEYS.stores, JSON.stringify(s)); }
+function saveStores(s){ localStorage.setItem(STORE_KEYS.stores, JSON.stringify(s)); pushToCloud('stores', s); }
 function getHistory(){ return JSON.parse(localStorage.getItem(STORE_KEYS.history) || '[]'); }
-function saveHistory(h){ localStorage.setItem(STORE_KEYS.history, JSON.stringify(h)); }
+function saveHistory(h){ localStorage.setItem(STORE_KEYS.history, JSON.stringify(h)); pushToCloud('purchase_history', h); }
 function getOrders(){ return JSON.parse(localStorage.getItem(STORE_KEYS.orders) || '[]'); }
-function saveOrders(o){ localStorage.setItem(STORE_KEYS.orders, JSON.stringify(o)); }
+function saveOrders(o){ localStorage.setItem(STORE_KEYS.orders, JSON.stringify(o)); pushToCloud('orders', o); }
 function getConsumables(){ return JSON.parse(localStorage.getItem(STORE_KEYS.consumables) || '[]'); }
-function saveConsumables(c){ localStorage.setItem(STORE_KEYS.consumables, JSON.stringify(c)); }
+function saveConsumables(c){ localStorage.setItem(STORE_KEYS.consumables, JSON.stringify(c)); pushToCloud('consumables', c); }
 seedIfNeeded();
 
 /* ============================================================
@@ -1511,6 +1659,7 @@ function initStoresPage(){
     grid.style.display='grid'; emptyState.style.display='none';
     grid.innerHTML = filtered.map(s=>`
       <div class="store-card" data-id="${s.id}">
+        ${s.imageUrl ? `<img src="${s.imageUrl}" alt="${s.name}" style="width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:12px;">` : ''}
         <div class="vendor-card-top"><div><h3>${s.name}</h3><div class="cat">${s.address || 'No address on file'}</div></div>${stampHtml(s.status)}</div>
         <div class="meta-row"><span class="text-muted">${s.contact || 'No contact set'}</span><span class="mono text-muted" style="font-size:11px;">${s.id}</span></div>
         <div class="store-detail">
@@ -1528,18 +1677,32 @@ function initStoresPage(){
   document.getElementById('add-store-btn').addEventListener('click', ()=> openModal('add-store-modal'));
   document.getElementById('cancel-add-store').addEventListener('click', ()=> closeModal('add-store-modal'));
 
-  document.getElementById('add-store-form').addEventListener('submit', (e)=>{
+  document.getElementById('add-store-form').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const imageInput = document.getElementById('store-image-file');
+    const imageStatus = document.getElementById('store-image-status');
+    let imageUrl = '';
+    submitBtn.disabled = true;
+    try{
+      const imageFile = imageInput.files[0];
+      if(imageFile) imageUrl = await uploadToCloudinary(imageFile, imageStatus);
+    }catch(err){
+      submitBtn.disabled = false;
+      showToast('Store photo failed to upload — saving the store without it.', 'error');
+    }
     const newStore = {
       id: uid('S'), name: fd.get('name').trim(), address: fd.get('address').trim(),
-      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), status:'active'
+      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), status:'active', imageUrl
     };
     stores.unshift(newStore);
     saveStores(stores);
     render();
     closeModal('add-store-modal');
     e.target.reset();
+    imageStatus.textContent = ''; imageStatus.className = 'upload-status';
+    submitBtn.disabled = false;
     refreshAll();
     showToast('Store "' + newStore.name + '" added to the directory.');
     // keep every dropdown that lists stores in sync
@@ -2118,16 +2281,116 @@ function initConsumablesPage(){
 }
 
 /* ============================================================
-   INIT — everything is built once the page loads
+   INIT — everything is built once the page loads.
+   If Supabase is configured, we fetch the real data first so the
+   very first render already shows what's in the database; if it's
+   not configured yet, this resolves instantly and the app runs on
+   localStorage exactly as before.
    ============================================================ */
-renderDashboard();
-initDashboardControls();
-initVendorsPage();
-initStoresPage();
-initOrdersPage();
-initHistoryPage();
-initPendingBillsPage();
-initConsumablesPage();
+async function startApp(){
+  await bootstrapFromCloud();
+  renderDashboard();
+  initDashboardControls();
+  initVendorsPage();
+  initStoresPage();
+  initOrdersPage();
+  initHistoryPage();
+  initPendingBillsPage();
+  initConsumablesPage();
+
+  // Live sync: when another device/tab changes data, refetch and re-render here too.
+  if(cloud){
+    let remoteRefreshTimer = null;
+    const onRemoteChange = ()=>{
+      clearTimeout(remoteRefreshTimer);
+      remoteRefreshTimer = setTimeout(async ()=>{
+        await bootstrapFromCloud();
+        refreshAll();
+      }, 700);
+    };
+    cloud
+      .channel('procurement-live')
+      .on('postgres_changes', { event:'*', schema:'public', table:'vendors' }, onRemoteChange)
+      .on('postgres_changes', { event:'*', schema:'public', table:'stores' }, onRemoteChange)
+      .on('postgres_changes', { event:'*', schema:'public', table:'purchase_history' }, onRemoteChange)
+      .on('postgres_changes', { event:'*', schema:'public', table:'orders' }, onRemoteChange)
+      .on('postgres_changes', { event:'*', schema:'public', table:'consumables' }, onRemoteChange)
+      .subscribe();
+  }
+}
+startApp();
+</script>
+
+<script>
+/* ============================================================
+   LOGIN GATE — simple fixed user ID / password check
+   ============================================================ */
+(function(){
+  const AUTH_KEY = 'ash_procurement_auth';
+  const VALID_USER = 'ash';       // compared case-insensitively
+  const VALID_PASS = 'saiharsha'; // compared exactly
+
+  const overlay = document.getElementById('auth-overlay');
+  const form = document.getElementById('auth-form');
+  const errorEl = document.getElementById('auth-error');
+  const logoutBtn = document.getElementById('logout-btn');
+  const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+  if(!overlay || !form){
+    console.error('Login gate: could not find #auth-overlay or #auth-form in the page.');
+    return;
+  }
+
+  function unlock(){
+    overlay.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+
+  function attemptLogin(){
+    const userInput = form.querySelector('[name="username"]');
+    const passInput = form.querySelector('[name="password"]');
+    const user = (userInput.value || '').trim();
+    const pass = (passInput.value || '').trim();
+    if(user.toLowerCase() === VALID_USER && pass === VALID_PASS){
+      localStorage.setItem(AUTH_KEY, '1');
+      errorEl.textContent = '';
+      unlock();
+    } else {
+      errorEl.textContent = 'Incorrect user ID or password. Please try again.';
+      passInput.value = '';
+      passInput.focus();
+    }
+  }
+
+  // Already logged in on this device? Skip straight to the app.
+  if(localStorage.getItem(AUTH_KEY) === '1'){
+    unlock();
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    attemptLogin();
+  });
+
+  // Safety net: in case the form's submit event is ever blocked or the
+  // button is styled/placed such that it stops behaving as a submit button,
+  // also handle a direct click.
+  if(submitBtn){
+    submitBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      attemptLogin();
+    });
+  }
+
+  if(logoutBtn){
+    logoutBtn.addEventListener('click', function(){
+      if(confirm('Log out of Ash Procurement?')){
+        localStorage.removeItem(AUTH_KEY);
+        location.reload();
+      }
+    });
+  }
+})();
 </script>
 </body>
 </html>
