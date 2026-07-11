@@ -6,6 +6,11 @@
 -- Needed for gen_random_uuid()
 create extension if not exists "pgcrypto";
 
+-- If you already ran an earlier version of this schema (before store photos existed),
+-- this line safely adds the new column without affecting any existing data.
+-- (On a brand-new project this is a no-op since the table doesn't exist yet.)
+alter table if exists stores add column if not exists image_url text;
+
 -- ---------------------------------------------------------------
 -- VENDORS
 -- ---------------------------------------------------------------
@@ -32,6 +37,7 @@ create table if not exists stores (
   contact      text,
   phone        text,
   status       text not null default 'active' check (status in ('active','inactive')),
+  image_url    text,
   created_at   timestamptz not null default now()
 );
 
