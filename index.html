@@ -1494,15 +1494,15 @@ function initVendorsPage(){
         <div class="vendor-card-top"><div><h3>${v.name}</h3><div class="cat">${v.category}</div></div>${stampHtml(v.status)}</div>
         <div class="stars">${stars(v.rating)}</div>
         <div class="meta-row"><span class="text-muted">${v.contact}</span><span class="spend">${formatCurrency(v.totalSpend)}</span></div>
+        <div class="card-actions">
+          <button type="button" class="icon-btn" data-action="edit-vendor" data-id="${v.id}">✎ Edit</button>
+          <button type="button" class="icon-btn danger" data-action="delete-vendor" data-id="${v.id}">🗑 Delete</button>
+        </div>
         <div class="vendor-detail">
           <div><strong>Email:</strong> ${v.email}</div>
           <div><strong>Phone:</strong> ${v.phone || '—'}</div>
           <div><strong>Vendor ID:</strong> <span class="mono">${v.id}</span></div>
           <div><strong>Total spend to date:</strong> ${formatCurrency(v.totalSpend)}</div>
-          <div class="card-actions">
-            <button type="button" class="icon-btn" data-action="edit-vendor" data-id="${v.id}">✎ Edit</button>
-            <button type="button" class="icon-btn danger" data-action="delete-vendor" data-id="${v.id}">🗑 Delete</button>
-          </div>
         </div>
       </div>`).join('');
   }
@@ -1754,6 +1754,10 @@ function initStoresPage(){
         ${s.imageUrl ? `<img src="${s.imageUrl}" alt="${s.name}" style="width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:12px;">` : ''}
         <div class="vendor-card-top"><div><h3>${s.name}</h3><div class="cat">${s.address || 'No address on file'}</div></div>${stampHtml(s.status)}</div>
         <div class="meta-row"><span class="text-muted">${s.contact || 'No contact set'}</span><span class="mono text-muted" style="font-size:11px;">${s.id}</span></div>
+        <div class="card-actions">
+          <button type="button" class="icon-btn" data-action="edit-store" data-id="${s.id}">✎ Edit</button>
+          <button type="button" class="icon-btn danger" data-action="delete-store" data-id="${s.id}">🗑 Delete</button>
+        </div>
         <div class="store-detail">
           <div><strong>Address:</strong> ${s.address || '—'}</div>
           <div><strong>Contact:</strong> ${s.contact || '—'}</div>
