@@ -134,6 +134,12 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 .upload-status.done{ color:var(--verdigris); }
 .upload-status.error{ color:var(--rust); }
 .doc-link{ font-size:12px; color:var(--verdigris); text-decoration:none; font-weight:600; margin-right:8px; white-space:nowrap; }
+.row-actions{ display:flex; gap:6px; white-space:nowrap; }
+.icon-btn{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; padding:5px 10px; border-radius:7px; border:1px solid var(--line-strong); background:var(--paper); color:var(--text); cursor:pointer; font-family:inherit; }
+.icon-btn:hover{ border-color:var(--verdigris); color:var(--verdigris); }
+.icon-btn.danger:hover{ border-color:var(--rust); color:var(--rust); background:var(--rust-light); }
+.card-actions{ display:flex; gap:8px; margin-top:12px; }
+.card-actions .icon-btn{ flex:1; justify-content:center; }
 .doc-link:hover{ text-decoration:underline; }
 .dashboard-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .quick-actions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -547,6 +553,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
                 <th>Status</th>
                 <th class="sortable" data-key="paymentStatus">Payment<span class="arrow"></span></th>
                 <th>Docs</th>
+                <th>Actions</th>
               </tr></thead>
               <tbody id="orders-body"></tbody>
             </table>
@@ -689,6 +696,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
                 <th class="sortable" data-key="date">Date<span class="arrow"></span></th>
                 <th class="num sortable" data-key="amount">Amount<span class="arrow"></span></th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr></thead>
               <tbody id="history-body"></tbody>
             </table>
@@ -707,7 +715,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 <!-- Add Vendor modal -->
 <div class="modal-overlay" id="add-vendor-modal">
   <div class="modal">
-    <h2>Add a new vendor</h2>
+    <h2 id="vendor-modal-title">Add a new vendor</h2>
     <form id="add-vendor-form">
       <div class="form-grid">
         <div class="form-field">
@@ -738,7 +746,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancel-add-vendor">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save vendor</button>
+        <button type="submit" class="btn btn-primary" id="save-vendor-btn">Save vendor</button>
       </div>
     </form>
   </div>
@@ -747,7 +755,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 <!-- Add Purchase modal -->
 <div class="modal-overlay" id="add-purchase-modal">
   <div class="modal">
-    <h2>Add a purchase</h2>
+    <h2 id="purchase-modal-title">Add a purchase</h2>
     <form id="add-purchase-form">
       <div class="form-grid">
         <div class="form-field">
@@ -793,7 +801,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancel-add-purchase">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save purchase</button>
+        <button type="submit" class="btn btn-primary" id="save-purchase-btn">Save purchase</button>
       </div>
     </form>
   </div>
@@ -802,7 +810,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 <!-- Add Store modal -->
 <div class="modal-overlay" id="add-store-modal">
   <div class="modal">
-    <h2>Add a new store</h2>
+    <h2 id="store-modal-title">Add a new store</h2>
     <form id="add-store-form">
       <div class="form-grid">
         <div class="form-field full">
@@ -829,7 +837,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancel-add-store">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save store</button>
+        <button type="submit" class="btn btn-primary" id="save-store-btn">Save store</button>
       </div>
     </form>
   </div>
@@ -838,7 +846,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 <!-- Add Order modal -->
 <div class="modal-overlay" id="add-order-modal">
   <div class="modal">
-    <h2>Add an order</h2>
+    <h2 id="order-modal-title">Add an order</h2>
     <form id="add-order-form">
       <div class="form-grid">
         <div class="form-field">
@@ -908,7 +916,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 <!-- Add Consumable modal -->
 <div class="modal-overlay" id="add-consumable-modal">
   <div class="modal">
-    <h2>Add a consumable</h2>
+    <h2 id="consumable-modal-title">Add a consumable</h2>
     <form id="add-consumable-form">
       <div class="form-grid">
         <div class="form-field">
@@ -938,7 +946,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancel-add-consumable">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save consumable</button>
+        <button type="submit" class="btn btn-primary" id="save-consumable-btn">Save consumable</button>
       </div>
     </form>
   </div>
@@ -967,8 +975,8 @@ function formatDate(iso){ const d = new Date(iso); return d.toLocaleDateString('
    localStorage only (nothing breaks — it just won't sync across devices).
    ============================================================ */
 const SUPABASE_CONFIG = {
-  url: 'https://smidiuymojbbrtsgvhje.supabase.co',     // e.g. https://abcxyzproject.supabase.co
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaWRpdXltb2piYnJ0c2d2aGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NzYyNDUsImV4cCI6MjA5OTI1MjI0NX0.Rn5_MduWQnEQsSiYePNwkyCxN34bNgWnmVUMJCE_ty4'     // Settings → API → anon public
+  url: 'YOUR_SUPABASE_PROJECT_URL',     // e.g. https://abcxyzproject.supabase.co
+  anonKey: 'YOUR_SUPABASE_ANON_KEY'     // Settings → API → anon public
 };
 const CLOUD_ENABLED = SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_PROJECT_URL' && SUPABASE_CONFIG.anonKey !== 'YOUR_SUPABASE_ANON_KEY';
 const cloud = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
@@ -1056,8 +1064,8 @@ async function bootstrapFromCloud(){
    3. Copy your Cloud name (shown on the Cloudinary dashboard) below
    ============================================================ */
 const CLOUDINARY_CONFIG = {
-  cloudName: 'h5dhgxvn',       // e.g. 'dabc12345'
-  uploadPreset: 'ash-procurement'  // an unsigned upload preset from your Cloudinary settings
+  cloudName: 'YOUR_CLOUD_NAME',       // e.g. 'dabc12345'
+  uploadPreset: 'YOUR_UPLOAD_PRESET'  // an unsigned upload preset from your Cloudinary settings
 };
 async function uploadToCloudinary(file, statusEl){
   if(!file) return '';
@@ -1414,18 +1422,32 @@ function initDashboardControls(){
   });
 
   document.getElementById('dash-add-order-btn').addEventListener('click', ()=>{
+    if(window.__resetOrderEdit) window.__resetOrderEdit();
+    document.getElementById('add-order-form').reset();
+    document.getElementById('order-modal-title').textContent = 'Add an order';
+    document.getElementById('save-order-btn').textContent = 'Save order';
     populateOrderVendorSelect(); populateOrderStoreSelect();
     const dateInput = document.querySelector('#add-order-form [name="date"]');
     if(dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
     openModal('add-order-modal');
   });
   document.getElementById('dash-add-purchase-btn').addEventListener('click', ()=>{
+    if(window.__resetPurchaseEdit) window.__resetPurchaseEdit();
+    document.getElementById('add-purchase-form').reset();
+    document.getElementById('purchase-modal-title').textContent = 'Add a purchase';
+    document.getElementById('save-purchase-btn').textContent = 'Save purchase';
     populatePurchaseVendorSelect(); populatePurchaseStoreSelect();
     const dateInput = document.querySelector('#add-purchase-form [name="date"]');
     if(dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
     openModal('add-purchase-modal');
   });
-  document.getElementById('dash-add-vendor-btn').addEventListener('click', ()=> openModal('add-vendor-modal'));
+  document.getElementById('dash-add-vendor-btn').addEventListener('click', ()=>{
+    if(window.__resetVendorEdit) window.__resetVendorEdit();
+    document.getElementById('add-vendor-form').reset();
+    document.getElementById('vendor-modal-title').textContent = 'Add a new vendor';
+    document.getElementById('save-vendor-btn').textContent = 'Save vendor';
+    openModal('add-vendor-modal');
+  });
 
   // Keep the dashboard live if data changes in another browser tab
   window.addEventListener('storage', (e)=>{
@@ -1438,6 +1460,7 @@ function initDashboardControls(){
    ============================================================ */
 function initVendorsPage(){
   let vendors = getVendors();
+  let editingVendorId = null;
   const grid = document.getElementById('vendor-grid');
   const emptyState = document.getElementById('vendor-empty');
   const searchInput = document.getElementById('vendor-search');
@@ -1476,24 +1499,91 @@ function initVendorsPage(){
           <div><strong>Phone:</strong> ${v.phone || '—'}</div>
           <div><strong>Vendor ID:</strong> <span class="mono">${v.id}</span></div>
           <div><strong>Total spend to date:</strong> ${formatCurrency(v.totalSpend)}</div>
+          <div class="card-actions">
+            <button type="button" class="icon-btn" data-action="edit-vendor" data-id="${v.id}">✎ Edit</button>
+            <button type="button" class="icon-btn danger" data-action="delete-vendor" data-id="${v.id}">🗑 Delete</button>
+          </div>
         </div>
       </div>`).join('');
   }
 
-  grid.addEventListener('click', (e)=>{ const card = e.target.closest('.vendor-card'); if(card) card.classList.toggle('expanded'); });
+  function openVendorModalForAdd(){
+    editingVendorId = null;
+    document.getElementById('add-vendor-form').reset();
+    document.getElementById('vendor-modal-title').textContent = 'Add a new vendor';
+    document.getElementById('save-vendor-btn').textContent = 'Save vendor';
+    openModal('add-vendor-modal');
+  }
+  function openVendorModalForEdit(id){
+    const v = vendors.find(x=>x.id===id);
+    if(!v) return;
+    editingVendorId = id;
+    const form = document.getElementById('add-vendor-form');
+    form.querySelector('[name="name"]').value = v.name;
+    form.querySelector('[name="category"]').value = v.category;
+    form.querySelector('[name="contact"]').value = v.contact;
+    form.querySelector('[name="email"]').value = v.email;
+    form.querySelector('[name="phone"]').value = v.phone || '';
+    document.getElementById('vendor-modal-title').textContent = 'Edit vendor';
+    document.getElementById('save-vendor-btn').textContent = 'Save changes';
+    openModal('add-vendor-modal');
+  }
+  function deleteVendorById(id){
+    const v = vendors.find(x=>x.id===id);
+    if(!v) return;
+    if(!confirm(`Delete vendor "${v.name}"? This can't be undone.`)) return;
+    vendors = vendors.filter(x=>x.id!==id);
+    saveVendors(vendors);
+    render();
+    populatePurchaseVendorSelect();
+    populateOrderVendorSelect();
+    populateOrderVendorFilter();
+    populatePendingBillsVendorFilter();
+    refreshAll();
+    showToast('Vendor "' + v.name + '" deleted.');
+  }
+
+  grid.addEventListener('click', (e)=>{
+    const actionBtn = e.target.closest('[data-action]');
+    if(actionBtn){
+      e.stopPropagation();
+      const id = actionBtn.dataset.id;
+      if(actionBtn.dataset.action === 'edit-vendor') openVendorModalForEdit(id);
+      if(actionBtn.dataset.action === 'delete-vendor') deleteVendorById(id);
+      return;
+    }
+    const card = e.target.closest('.vendor-card');
+    if(card) card.classList.toggle('expanded');
+  });
   [searchInput, catFilter, statusFilter].forEach(el => el.addEventListener('input', render));
 
-  document.getElementById('add-vendor-btn').addEventListener('click', ()=> openModal('add-vendor-modal'));
-  document.getElementById('cancel-add-vendor').addEventListener('click', ()=> closeModal('add-vendor-modal'));
+  document.getElementById('add-vendor-btn').addEventListener('click', openVendorModalForAdd);
+  document.getElementById('cancel-add-vendor').addEventListener('click', ()=> { editingVendorId = null; closeModal('add-vendor-modal'); });
 
   document.getElementById('add-vendor-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
-    const newVendor = {
-      id: uid('V'), name: fd.get('name').trim(), category: fd.get('category'),
-      contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim(),
-      rating:4.0, status:'active', totalSpend:0
+    const vendorData = {
+      name: fd.get('name').trim(), category: fd.get('category'),
+      contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim()
     };
+    if(editingVendorId){
+      vendors = vendors.map(v => v.id === editingVendorId ? { ...v, ...vendorData } : v);
+      saveVendors(vendors);
+      refreshCategoryOptions();
+      render();
+      closeModal('add-vendor-modal');
+      e.target.reset();
+      refreshAll();
+      showToast('Vendor "' + vendorData.name + '" updated.');
+      populatePurchaseVendorSelect();
+      populateOrderVendorSelect();
+      populateOrderVendorFilter();
+      populatePendingBillsVendorFilter();
+      editingVendorId = null;
+      return;
+    }
+    const newVendor = { id: uid('V'), ...vendorData, rating:4.0, status:'active', totalSpend:0 };
     vendors.unshift(newVendor);
     saveVendors(vendors);
     refreshCategoryOptions();
@@ -1546,6 +1636,7 @@ function initVendorsPage(){
 
   render();
   window.__renderVendors = render; // exposed so the Add Purchase modal can refresh the dropdown list live
+  window.__resetVendorEdit = ()=> { editingVendorId = null; };
 }
 
 /* ============================================================
@@ -1642,6 +1733,7 @@ function populateConsumableStoreFilter(){
    ============================================================ */
 function initStoresPage(){
   let stores = getStores();
+  let editingStoreId = null;
   const grid = document.getElementById('store-grid');
   const emptyState = document.getElementById('store-empty');
   const searchInput = document.getElementById('store-search');
@@ -1667,15 +1759,70 @@ function initStoresPage(){
           <div><strong>Contact:</strong> ${s.contact || '—'}</div>
           <div><strong>Phone:</strong> ${s.phone || '—'}</div>
           <div><strong>Store ID:</strong> <span class="mono">${s.id}</span></div>
+          <div class="card-actions">
+            <button type="button" class="icon-btn" data-action="edit-store" data-id="${s.id}">✎ Edit</button>
+            <button type="button" class="icon-btn danger" data-action="delete-store" data-id="${s.id}">🗑 Delete</button>
+          </div>
         </div>
       </div>`).join('');
   }
 
-  grid.addEventListener('click', (e)=>{ const card = e.target.closest('.store-card'); if(card) card.classList.toggle('expanded'); });
+  function openStoreModalForAdd(){
+    editingStoreId = null;
+    document.getElementById('add-store-form').reset();
+    document.getElementById('store-modal-title').textContent = 'Add a new store';
+    document.getElementById('save-store-btn').textContent = 'Save store';
+    openModal('add-store-modal');
+  }
+  function openStoreModalForEdit(id){
+    const s = stores.find(x=>x.id===id);
+    if(!s) return;
+    editingStoreId = id;
+    const form = document.getElementById('add-store-form');
+    form.querySelector('[name="name"]').value = s.name;
+    form.querySelector('[name="address"]').value = s.address || '';
+    form.querySelector('[name="contact"]').value = s.contact || '';
+    form.querySelector('[name="phone"]').value = s.phone || '';
+    document.getElementById('store-modal-title').textContent = 'Edit store';
+    document.getElementById('save-store-btn').textContent = 'Save changes';
+    openModal('add-store-modal');
+  }
+  function deleteStoreById(id){
+    const s = stores.find(x=>x.id===id);
+    if(!s) return;
+    if(!confirm(`Delete store "${s.name}"? This can't be undone.`)) return;
+    stores = stores.filter(x=>x.id!==id);
+    saveStores(stores);
+    render();
+    populatePurchaseStoreSelect();
+    populateOrderStoreSelect();
+    populateHistoryStoreFilter();
+    populateConsumableStoreSelect();
+    populateConsumableStoreFilter();
+    populateOrderStoreFilter();
+    populatePendingBillsStoreFilter();
+    if(window.__renderOrders) window.__renderOrders();
+    if(window.__renderConsumables) window.__renderConsumables();
+    refreshAll();
+    showToast('Store "' + s.name + '" deleted.');
+  }
+
+  grid.addEventListener('click', (e)=>{
+    const actionBtn = e.target.closest('[data-action]');
+    if(actionBtn){
+      e.stopPropagation();
+      const id = actionBtn.dataset.id;
+      if(actionBtn.dataset.action === 'edit-store') openStoreModalForEdit(id);
+      if(actionBtn.dataset.action === 'delete-store') deleteStoreById(id);
+      return;
+    }
+    const card = e.target.closest('.store-card');
+    if(card) card.classList.toggle('expanded');
+  });
   [searchInput, statusFilter].forEach(el => el.addEventListener('input', render));
 
-  document.getElementById('add-store-btn').addEventListener('click', ()=> openModal('add-store-modal'));
-  document.getElementById('cancel-add-store').addEventListener('click', ()=> closeModal('add-store-modal'));
+  document.getElementById('add-store-btn').addEventListener('click', openStoreModalForAdd);
+  document.getElementById('cancel-add-store').addEventListener('click', ()=> { editingStoreId = null; closeModal('add-store-modal'); });
 
   document.getElementById('add-store-form').addEventListener('submit', async (e)=>{
     e.preventDefault();
@@ -1683,7 +1830,7 @@ function initStoresPage(){
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const imageInput = document.getElementById('store-image-file');
     const imageStatus = document.getElementById('store-image-status');
-    let imageUrl = '';
+    let imageUrl = editingStoreId ? (stores.find(x=>x.id===editingStoreId)?.imageUrl || '') : '';
     submitBtn.disabled = true;
     try{
       const imageFile = imageInput.files[0];
@@ -1692,10 +1839,36 @@ function initStoresPage(){
       submitBtn.disabled = false;
       showToast('Store photo failed to upload — saving the store without it.', 'error');
     }
-    const newStore = {
-      id: uid('S'), name: fd.get('name').trim(), address: fd.get('address').trim(),
-      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), status:'active', imageUrl
+    const storeData = {
+      name: fd.get('name').trim(), address: fd.get('address').trim(),
+      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), imageUrl
     };
+
+    if(editingStoreId){
+      const oldName = stores.find(x=>x.id===editingStoreId)?.name;
+      stores = stores.map(s => s.id === editingStoreId ? { ...s, ...storeData } : s);
+      saveStores(stores);
+      render();
+      closeModal('add-store-modal');
+      e.target.reset();
+      imageStatus.textContent = ''; imageStatus.className = 'upload-status';
+      submitBtn.disabled = false;
+      refreshAll();
+      showToast('Store "' + storeData.name + '" updated.');
+      populatePurchaseStoreSelect();
+      populateOrderStoreSelect();
+      populateHistoryStoreFilter();
+      populateConsumableStoreSelect();
+      populateConsumableStoreFilter();
+      populateOrderStoreFilter();
+      populatePendingBillsStoreFilter();
+      if(window.__renderOrders) window.__renderOrders();
+      if(window.__renderConsumables) window.__renderConsumables();
+      editingStoreId = null;
+      return;
+    }
+
+    const newStore = { id: uid('S'), ...storeData, status:'active' };
     stores.unshift(newStore);
     saveStores(stores);
     render();
@@ -1750,13 +1923,15 @@ function initStoresPage(){
 
   render();
   window.__renderStores = render;
+  window.__resetStoreEdit = ()=> { editingStoreId = null; };
 }
 
 /* ============================================================
    PURCHASE HISTORY — manual entry
    ============================================================ */
 function initHistoryPage(){
-  const history = getHistory();
+  let history = getHistory();
+  let editingPurchaseId = null;
   let sortKey = 'date', sortDir = 'desc';
   const searchInput = document.getElementById('history-search');
   const statusFilter = document.getElementById('filter-history-status');
@@ -1800,7 +1975,11 @@ function initHistoryPage(){
     table.style.display='table'; emptyState.style.display='none';
     tbody.innerHTML = filtered.map(h=>`
       <tr><td class="mono">${h.poNumber}</td><td class="cell-primary">${h.vendor}</td><td>${h.store||'—'}</td><td>${h.item}</td>
-        <td>${h.department}</td><td>${formatDate(h.date)}</td><td class="num mono">${formatCurrency(h.amount)}</td><td>${stampHtml(h.status)}</td></tr>
+        <td>${h.department}</td><td>${formatDate(h.date)}</td><td class="num mono">${formatCurrency(h.amount)}</td><td>${stampHtml(h.status)}</td>
+        <td><div class="row-actions">
+          <button type="button" class="icon-btn" data-action="edit-purchase" data-id="${h.id}">✎</button>
+          <button type="button" class="icon-btn danger" data-action="delete-purchase" data-id="${h.id}">🗑</button>
+        </div></td></tr>
     `).join('');
     table.querySelectorAll('th.sortable').forEach(th=>{
       const arrow = th.querySelector('.arrow');
@@ -1823,21 +2002,63 @@ function initHistoryPage(){
   const purchaseForm = document.getElementById('add-purchase-form');
   const dateInput = purchaseForm.querySelector('[name="date"]');
 
-  addBtn.addEventListener('click', ()=>{
+  function openPurchaseModalForAdd(){
+    editingPurchaseId = null;
+    purchaseForm.reset();
     populatePurchaseVendorSelect();
     populatePurchaseStoreSelect();
     if(!dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
+    document.getElementById('purchase-modal-title').textContent = 'Add a purchase';
+    document.getElementById('save-purchase-btn').textContent = 'Save purchase';
     openModal('add-purchase-modal');
+  }
+  function openPurchaseModalForEdit(id){
+    const h = history.find(x=>x.id===id);
+    if(!h) return;
+    editingPurchaseId = id;
+    populatePurchaseVendorSelect();
+    populatePurchaseStoreSelect();
+    purchaseForm.querySelector('[name="poNumber"]').value = h.poNumber;
+    purchaseForm.querySelector('[name="vendor"]').value = h.vendor;
+    purchaseForm.querySelector('[name="store"]').value = h.store;
+    purchaseForm.querySelector('[name="item"]').value = h.item;
+    purchaseForm.querySelector('[name="department"]').value = h.department;
+    purchaseForm.querySelector('[name="amount"]').value = h.amount;
+    purchaseForm.querySelector('[name="date"]').value = h.date;
+    purchaseForm.querySelector('[name="status"]').value = h.status;
+    document.getElementById('purchase-modal-title').textContent = 'Edit purchase';
+    document.getElementById('save-purchase-btn').textContent = 'Save changes';
+    openModal('add-purchase-modal');
+  }
+  function deletePurchaseById(id){
+    const h = history.find(x=>x.id===id);
+    if(!h) return;
+    if(!confirm(`Delete purchase "${h.poNumber}"? This can't be undone.`)) return;
+    history = history.filter(x=>x.id!==id);
+    saveHistory(history);
+    render();
+    renderDashboard();
+    refreshAll();
+    showToast('Purchase ' + h.poNumber + ' deleted.');
+  }
+
+  tbody.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === 'edit-purchase') openPurchaseModalForEdit(id);
+    if(btn.dataset.action === 'delete-purchase') deletePurchaseById(id);
   });
-  document.getElementById('cancel-add-purchase').addEventListener('click', ()=> closeModal('add-purchase-modal'));
+
+  addBtn.addEventListener('click', openPurchaseModalForAdd);
+  document.getElementById('cancel-add-purchase').addEventListener('click', ()=> { editingPurchaseId = null; closeModal('add-purchase-modal'); });
 
   purchaseForm.addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(purchaseForm);
     const vendorValue = fd.get('vendor') === '__new__' ? 'Unlisted vendor' : fd.get('vendor');
     const storeValue = fd.get('store') === '__new__' ? 'Unlisted store' : fd.get('store');
-    const newPurchase = {
-      id: uid('H'),
+    const purchaseData = {
       poNumber: fd.get('poNumber').trim(),
       vendor: vendorValue,
       store: storeValue,
@@ -1847,6 +2068,22 @@ function initHistoryPage(){
       date: fd.get('date'),
       status: fd.get('status')
     };
+
+    if(editingPurchaseId){
+      history = history.map(h => h.id === editingPurchaseId ? { ...h, ...purchaseData } : h);
+      saveHistory(history);
+      populateHistoryStoreFilter();
+      render();
+      renderDashboard();
+      closeModal('add-purchase-modal');
+      purchaseForm.reset();
+      refreshAll();
+      showToast('Purchase ' + purchaseData.poNumber + ' updated.');
+      editingPurchaseId = null;
+      return;
+    }
+
+    const newPurchase = { id: uid('H'), ...purchaseData };
     history.unshift(newPurchase);
     saveHistory(history);
     populateHistoryStoreFilter();
@@ -1892,13 +2129,15 @@ function initHistoryPage(){
 
   render();
   window.__renderHistory = render;
+  window.__resetPurchaseEdit = ()=> { editingPurchaseId = null; };
 }
 
 /* ============================================================
    ORDERS — manual entry
    ============================================================ */
 function initOrdersPage(){
-  const orders = getOrders();
+  let orders = getOrders();
+  let editingOrderId = null;
   let sortKey = 'date', sortDir = 'desc';
   const idFilter = document.getElementById('order-search-id');
   const vendorFilter = document.getElementById('filter-order-vendor');
@@ -1961,7 +2200,11 @@ function initOrdersPage(){
       <tr><td class="mono">${o.orderNumber}</td><td class="cell-primary">${o.vendor}</td><td>${o.store||'—'}</td><td>${o.item}</td>
         <td class="num mono">${o.quantity}</td><td>${formatDate(o.date)}</td>
         <td class="num mono">${formatINR(o.amount)}</td><td>${stampHtml(o.status)}</td>
-        <td>${stampHtml(o.paymentStatus || 'unpaid')}</td><td>${docLinks(o)}</td></tr>
+        <td>${stampHtml(o.paymentStatus || 'unpaid')}</td><td>${docLinks(o)}</td>
+        <td><div class="row-actions">
+          <button type="button" class="icon-btn" data-action="edit-order" data-id="${o.id}">✎</button>
+          <button type="button" class="icon-btn danger" data-action="delete-order" data-id="${o.id}">🗑</button>
+        </div></td></tr>
     `).join('');
     table.querySelectorAll('th.sortable').forEach(th=>{
       const arrow = th.querySelector('.arrow');
@@ -1981,7 +2224,7 @@ function initOrdersPage(){
     render();
   });
 
-  // ---- Add order (manual entry) ----
+  // ---- Add / Edit order (manual entry) ----
   populateOrderVendorSelect();
   populateOrderStoreSelect();
   const addBtn = document.getElementById('add-order-btn');
@@ -1993,23 +2236,72 @@ function initOrdersPage(){
   const invoiceStatus = document.getElementById('order-invoice-status');
   const proofStatus = document.getElementById('order-proof-status');
 
-  addBtn.addEventListener('click', ()=>{
+  function openOrderModalForAdd(){
+    editingOrderId = null;
+    orderForm.reset();
     populateOrderVendorSelect();
     populateOrderStoreSelect();
     if(!dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
+    document.getElementById('order-modal-title').textContent = 'Add an order';
+    saveBtn.textContent = 'Save order';
     openModal('add-order-modal');
+  }
+  function openOrderModalForEdit(id){
+    const o = orders.find(x=>x.id===id);
+    if(!o) return;
+    editingOrderId = id;
+    populateOrderVendorSelect();
+    populateOrderStoreSelect();
+    orderForm.querySelector('[name="orderNumber"]').value = o.orderNumber;
+    orderForm.querySelector('[name="vendor"]').value = o.vendor;
+    orderForm.querySelector('[name="store"]').value = o.store;
+    orderForm.querySelector('[name="item"]').value = o.item;
+    orderForm.querySelector('[name="quantity"]').value = o.quantity;
+    orderForm.querySelector('[name="amount"]').value = o.amount;
+    orderForm.querySelector('[name="date"]').value = o.date;
+    orderForm.querySelector('[name="status"]').value = o.status;
+    orderForm.querySelector('[name="paymentStatus"]').value = o.paymentStatus || 'unpaid';
+    document.getElementById('order-modal-title').textContent = 'Edit order';
+    saveBtn.textContent = 'Save changes';
+    openModal('add-order-modal');
+  }
+  function deleteOrderById(id){
+    const o = orders.find(x=>x.id===id);
+    if(!o) return;
+    if(!confirm(`Delete order "${o.orderNumber}"? This can't be undone.`)) return;
+    orders = orders.filter(x=>x.id!==id);
+    saveOrders(orders);
+    populateOrderVendorFilter();
+    populateOrderStoreFilter();
+    render();
+    renderDashboard();
+    if(window.__renderPendingBills) window.__renderPendingBills();
+    refreshAll();
+    showToast('Order ' + o.orderNumber + ' deleted.');
+  }
+
+  tbody.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === 'edit-order') openOrderModalForEdit(id);
+    if(btn.dataset.action === 'delete-order') deleteOrderById(id);
   });
-  document.getElementById('cancel-add-order').addEventListener('click', ()=> closeModal('add-order-modal'));
+
+  addBtn.addEventListener('click', openOrderModalForAdd);
+  document.getElementById('cancel-add-order').addEventListener('click', ()=> { editingOrderId = null; closeModal('add-order-modal'); });
 
   orderForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const fd = new FormData(orderForm);
     const vendorValue = fd.get('vendor') === '__new__' ? 'Unlisted vendor' : fd.get('vendor');
     const storeValue = fd.get('store') === '__new__' ? 'Unlisted store' : fd.get('store');
+    const existing = editingOrderId ? orders.find(x=>x.id===editingOrderId) : null;
 
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
-    let invoiceUrl = '', proofUrl = '';
+    let invoiceUrl = existing ? (existing.invoiceUrl || '') : '';
+    let proofUrl = existing ? (existing.proofUrl || '') : '';
     try{
       const invoiceFile = invoiceInput.files[0];
       const proofFile = proofInput.files[0];
@@ -2020,11 +2312,10 @@ function initOrdersPage(){
       showToast('Could not upload one of the files — check Cloudinary setup. Saving the order without it.', 'error');
     }finally{
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Save order';
+      saveBtn.textContent = editingOrderId ? 'Save changes' : 'Save order';
     }
 
-    const newOrder = {
-      id: uid('O'),
+    const orderData = {
       orderNumber: fd.get('orderNumber').trim(),
       vendor: vendorValue,
       store: storeValue,
@@ -2036,6 +2327,26 @@ function initOrdersPage(){
       paymentStatus: fd.get('paymentStatus'),
       invoiceUrl, proofUrl
     };
+
+    if(editingOrderId){
+      orders = orders.map(o => o.id === editingOrderId ? { ...o, ...orderData } : o);
+      saveOrders(orders);
+      populateOrderVendorFilter();
+      populateOrderStoreFilter();
+      render();
+      renderDashboard();
+      if(window.__renderPendingBills) window.__renderPendingBills();
+      closeModal('add-order-modal');
+      orderForm.reset();
+      invoiceStatus.textContent = ''; invoiceStatus.className = 'upload-status';
+      proofStatus.textContent = ''; proofStatus.className = 'upload-status';
+      refreshAll();
+      showToast('Order ' + orderData.orderNumber + ' updated.');
+      editingOrderId = null;
+      return;
+    }
+
+    const newOrder = { id: uid('O'), ...orderData };
     orders.unshift(newOrder);
     saveOrders(orders);
     populateOrderVendorFilter();
@@ -2091,6 +2402,7 @@ function initOrdersPage(){
 
   render();
   window.__renderOrders = render;
+  window.__resetOrderEdit = ()=> { editingOrderId = null; };
 }
 
 /* ============================================================
@@ -2186,6 +2498,7 @@ function initPendingBillsPage(){
    ============================================================ */
 function initConsumablesPage(){
   let consumables = getConsumables();
+  let editingConsumableId = null;
   const searchInput = document.getElementById('consumables-search');
   const storeFilter = document.getElementById('filter-consumables-store');
   const groupsEl = document.getElementById('consumables-groups');
@@ -2213,13 +2526,17 @@ function initConsumablesPage(){
         <div class="card-head"><h2>${storeName}</h2><span class="hint">${items.length} item${items.length===1?'':'s'}</span></div>
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>Item</th><th>Category</th><th class="num">Quantity</th><th>Unit</th><th class="num">Reorder level</th><th>Status</th></tr></thead>
+            <thead><tr><th>Item</th><th>Category</th><th class="num">Quantity</th><th>Unit</th><th class="num">Reorder level</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               ${items.map(c=>{
                 const low = Number(c.quantity) <= Number(c.reorderLevel || 0) && Number(c.reorderLevel||0) > 0;
                 return `<tr><td class="cell-primary">${c.item}</td><td>${c.category||'—'}</td>
                   <td class="num mono">${c.quantity}</td><td>${c.unit||'—'}</td><td class="num mono">${c.reorderLevel ?? '—'}</td>
-                  <td>${low ? '<span class="stamp stamp-unpaid">Reorder</span>' : '<span class="stamp stamp-paid">OK</span>'}</td></tr>`;
+                  <td>${low ? '<span class="stamp stamp-unpaid">Reorder</span>' : '<span class="stamp stamp-paid">OK</span>'}</td>
+                  <td><div class="row-actions">
+                    <button type="button" class="icon-btn" data-action="edit-consumable" data-id="${c.id}">✎</button>
+                    <button type="button" class="icon-btn danger" data-action="delete-consumable" data-id="${c.id}">🗑</button>
+                  </div></td></tr>`;
               }).join('')}
             </tbody>
           </table>
@@ -2227,22 +2544,76 @@ function initConsumablesPage(){
       </section>`).join('');
   }
 
+  groupsEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === 'edit-consumable') openConsumableModalForEdit(id);
+    if(btn.dataset.action === 'delete-consumable') deleteConsumableById(id);
+  });
+
   [searchInput, storeFilter].forEach(el=>el.addEventListener('input', render));
 
-  document.getElementById('add-consumable-btn').addEventListener('click', ()=>{
+  function openConsumableModalForAdd(){
+    editingConsumableId = null;
+    document.getElementById('add-consumable-form').reset();
     populateConsumableStoreSelect();
+    document.getElementById('consumable-modal-title').textContent = 'Add a consumable';
+    document.getElementById('save-consumable-btn').textContent = 'Save consumable';
     openModal('add-consumable-modal');
-  });
-  document.getElementById('cancel-add-consumable').addEventListener('click', ()=> closeModal('add-consumable-modal'));
+  }
+  function openConsumableModalForEdit(id){
+    const c = consumables.find(x=>x.id===id);
+    if(!c) return;
+    editingConsumableId = id;
+    populateConsumableStoreSelect();
+    const form = document.getElementById('add-consumable-form');
+    form.querySelector('[name="store"]').value = c.store;
+    form.querySelector('[name="item"]').value = c.item;
+    form.querySelector('[name="category"]').value = c.category || '';
+    form.querySelector('[name="quantity"]').value = c.quantity;
+    form.querySelector('[name="unit"]').value = c.unit || '';
+    form.querySelector('[name="reorderLevel"]').value = c.reorderLevel || 0;
+    document.getElementById('consumable-modal-title').textContent = 'Edit consumable';
+    document.getElementById('save-consumable-btn').textContent = 'Save changes';
+    openModal('add-consumable-modal');
+  }
+  function deleteConsumableById(id){
+    const c = consumables.find(x=>x.id===id);
+    if(!c) return;
+    if(!confirm(`Delete "${c.item}" from ${c.store}? This can't be undone.`)) return;
+    consumables = consumables.filter(x=>x.id!==id);
+    saveConsumables(consumables);
+    render();
+    refreshAll();
+    showToast('"' + c.item + '" deleted from ' + c.store + '.');
+  }
+
+  document.getElementById('add-consumable-btn').addEventListener('click', openConsumableModalForAdd);
+  document.getElementById('cancel-add-consumable').addEventListener('click', ()=> { editingConsumableId = null; closeModal('add-consumable-modal'); });
 
   document.getElementById('add-consumable-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
     const storeValue = fd.get('store');
-    const newItem = {
-      id: uid('C'), store: storeValue, item: fd.get('item').trim(), category: fd.get('category').trim(),
+    const itemData = {
+      store: storeValue, item: fd.get('item').trim(), category: fd.get('category').trim(),
       quantity: Number(fd.get('quantity')), unit: fd.get('unit').trim(), reorderLevel: Number(fd.get('reorderLevel')) || 0
     };
+
+    if(editingConsumableId){
+      consumables = consumables.map(c => c.id === editingConsumableId ? { ...c, ...itemData } : c);
+      saveConsumables(consumables);
+      render();
+      closeModal('add-consumable-modal');
+      e.target.reset();
+      refreshAll();
+      showToast('"' + itemData.item + '" updated.');
+      editingConsumableId = null;
+      return;
+    }
+
+    const newItem = { id: uid('C'), ...itemData };
     consumables.unshift(newItem);
     saveConsumables(consumables);
     render();
