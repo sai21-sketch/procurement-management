@@ -157,6 +157,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 .vendor-card.expanded .vendor-detail, .store-card.expanded .store-detail{ display:block; }
 .vendor-detail div + div, .store-detail div + div{ margin-top:5px; }
 .vendor-detail strong, .store-detail strong{ color:var(--text); font-weight:600; }
+.card-action-row{ display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
 
 .form-card{ background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-card); padding:26px 28px; max-width:720px; }
 .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
@@ -1497,15 +1498,15 @@ function initVendorsPage(){
         <div class="vendor-card-top"><div><h3>${v.name}</h3><div class="cat">${v.category}</div></div>${stampHtml(v.status)}</div>
         <div class="stars">${stars(v.rating)}</div>
         <div class="meta-row"><span class="text-muted">${v.contact}</span><span class="spend">${formatCurrency(v.totalSpend)}</span></div>
+        <div class="card-action-row">
+          <button type="button" class="btn-icon-edit edit-vendor-btn" data-id="${v.id}">Edit</button>
+          <button type="button" class="btn-icon-danger delete-vendor-inline-btn" data-id="${v.id}">Delete</button>
+        </div>
         <div class="vendor-detail">
           <div><strong>Email:</strong> ${v.email}</div>
           <div><strong>Phone:</strong> ${v.phone || '—'}</div>
           <div><strong>Vendor ID:</strong> <span class="mono">${v.id}</span></div>
           <div><strong>Total spend to date:</strong> ${formatCurrency(v.totalSpend)}</div>
-          <div style="margin-top:12px; display:flex; gap:8px;">
-            <button type="button" class="btn-icon-edit edit-vendor-btn" data-id="${v.id}">Edit</button>
-            <button type="button" class="btn-icon-danger delete-vendor-inline-btn" data-id="${v.id}">Delete</button>
-          </div>
         </div>
       </div>`).join('');
   }
@@ -1766,15 +1767,15 @@ function initStoresPage(){
         ${s.imageUrl ? `<img src="${s.imageUrl}" alt="${s.name}" style="width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:12px;">` : ''}
         <div class="vendor-card-top"><div><h3>${s.name}</h3><div class="cat">${s.address || 'No address on file'}</div></div>${stampHtml(s.status)}</div>
         <div class="meta-row"><span class="text-muted">${s.contact || 'No contact set'}</span><span class="mono text-muted" style="font-size:11px;">${s.id}</span></div>
+        <div class="card-action-row">
+          <button type="button" class="btn-icon-edit edit-store-btn" data-id="${s.id}">Edit</button>
+          <button type="button" class="btn-icon-danger delete-store-inline-btn" data-id="${s.id}">Delete</button>
+        </div>
         <div class="store-detail">
           <div><strong>Address:</strong> ${s.address || '—'}</div>
           <div><strong>Contact:</strong> ${s.contact || '—'}</div>
           <div><strong>Phone:</strong> ${s.phone || '—'}</div>
           <div><strong>Store ID:</strong> <span class="mono">${s.id}</span></div>
-          <div style="margin-top:12px; display:flex; gap:8px;">
-            <button type="button" class="btn-icon-edit edit-store-btn" data-id="${s.id}">Edit</button>
-            <button type="button" class="btn-icon-danger delete-store-inline-btn" data-id="${s.id}">Delete</button>
-          </div>
         </div>
       </div>`).join('');
   }
