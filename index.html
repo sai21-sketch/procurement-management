@@ -108,6 +108,12 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 .btn-primary:hover{ background:var(--ink-light); }
 .btn-outline{ background:transparent; color:var(--ink); border-color:var(--line-strong); }
 .btn-outline:hover{ background:var(--paper); border-color:var(--ink-fade); }
+.btn-danger-outline{ background:transparent; color:var(--rust); border-color:var(--rust); }
+.btn-danger-outline:hover{ background:var(--rust-light); }
+.btn-icon-danger{ background:transparent; color:var(--rust); border:1px solid var(--line); border-radius:var(--radius-sm); padding:5px 8px; cursor:pointer; }
+.btn-icon-danger:hover{ background:var(--rust-light); border-color:var(--rust); }
+.btn-icon-edit{ background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:var(--radius-sm); padding:5px 8px; cursor:pointer; margin-right:4px; }
+.btn-icon-edit:hover{ background:var(--paper); border-color:var(--ink-fade); }
 .btn svg{ width:15px; height:15px; }
 
 .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
@@ -134,12 +140,6 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
 .upload-status.done{ color:var(--verdigris); }
 .upload-status.error{ color:var(--rust); }
 .doc-link{ font-size:12px; color:var(--verdigris); text-decoration:none; font-weight:600; margin-right:8px; white-space:nowrap; }
-.row-actions{ display:flex; gap:6px; white-space:nowrap; }
-.icon-btn{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; padding:5px 10px; border-radius:7px; border:1px solid var(--line-strong); background:var(--paper); color:var(--text); cursor:pointer; font-family:inherit; }
-.icon-btn:hover{ border-color:var(--verdigris); color:var(--verdigris); }
-.icon-btn.danger:hover{ border-color:var(--rust); color:var(--rust); background:var(--rust-light); }
-.card-actions{ display:flex; gap:8px; margin-top:12px; }
-.card-actions .icon-btn{ flex:1; justify-content:center; }
 .doc-link:hover{ text-decoration:underline; }
 .dashboard-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .quick-actions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -717,6 +717,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   <div class="modal">
     <h2 id="vendor-modal-title">Add a new vendor</h2>
     <form id="add-vendor-form">
+      <input type="hidden" name="editId" id="vendor-edit-id" value="">
       <div class="form-grid">
         <div class="form-field">
           <label>Vendor name <span class="req">*</span></label>
@@ -745,8 +746,9 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-danger-outline" id="delete-vendor-btn" style="display:none; margin-right:auto;">Delete vendor</button>
         <button type="button" class="btn btn-outline" id="cancel-add-vendor">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="save-vendor-btn">Save vendor</button>
+        <button type="submit" class="btn btn-primary" id="vendor-submit-btn">Save vendor</button>
       </div>
     </form>
   </div>
@@ -757,6 +759,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   <div class="modal">
     <h2 id="purchase-modal-title">Add a purchase</h2>
     <form id="add-purchase-form">
+      <input type="hidden" name="editId" id="purchase-edit-id" value="">
       <div class="form-grid">
         <div class="form-field">
           <label>PO Number <span class="req">*</span></label>
@@ -800,8 +803,9 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-danger-outline" id="delete-purchase-btn" style="display:none; margin-right:auto;">Delete purchase</button>
         <button type="button" class="btn btn-outline" id="cancel-add-purchase">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="save-purchase-btn">Save purchase</button>
+        <button type="submit" class="btn btn-primary" id="purchase-submit-btn">Save purchase</button>
       </div>
     </form>
   </div>
@@ -812,6 +816,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   <div class="modal">
     <h2 id="store-modal-title">Add a new store</h2>
     <form id="add-store-form">
+      <input type="hidden" name="editId" id="store-edit-id" value="">
       <div class="form-grid">
         <div class="form-field full">
           <label>Store name <span class="req">*</span></label>
@@ -836,8 +841,9 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-danger-outline" id="delete-store-btn" style="display:none; margin-right:auto;">Delete store</button>
         <button type="button" class="btn btn-outline" id="cancel-add-store">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="save-store-btn">Save store</button>
+        <button type="submit" class="btn btn-primary" id="store-submit-btn">Save store</button>
       </div>
     </form>
   </div>
@@ -848,6 +854,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   <div class="modal">
     <h2 id="order-modal-title">Add an order</h2>
     <form id="add-order-form">
+      <input type="hidden" name="editId" id="order-edit-id" value="">
       <div class="form-grid">
         <div class="form-field">
           <label>Order # <span class="req">*</span></label>
@@ -906,6 +913,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-danger-outline" id="delete-order-btn" style="display:none; margin-right:auto;">Delete order</button>
         <button type="button" class="btn btn-outline" id="cancel-add-order">Cancel</button>
         <button type="submit" class="btn btn-primary" id="save-order-btn">Save order</button>
       </div>
@@ -918,6 +926,7 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
   <div class="modal">
     <h2 id="consumable-modal-title">Add a consumable</h2>
     <form id="add-consumable-form">
+      <input type="hidden" name="editId" id="consumable-edit-id" value="">
       <div class="form-grid">
         <div class="form-field">
           <label>Store <span class="req">*</span></label>
@@ -945,8 +954,9 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-danger-outline" id="delete-consumable-btn" style="display:none; margin-right:auto;">Delete consumable</button>
         <button type="button" class="btn btn-outline" id="cancel-add-consumable">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="save-consumable-btn">Save consumable</button>
+        <button type="submit" class="btn btn-primary" id="consumable-submit-btn">Save consumable</button>
       </div>
     </form>
   </div>
@@ -1422,30 +1432,24 @@ function initDashboardControls(){
   });
 
   document.getElementById('dash-add-order-btn').addEventListener('click', ()=>{
-    if(window.__resetOrderEdit) window.__resetOrderEdit();
-    document.getElementById('add-order-form').reset();
-    document.getElementById('order-modal-title').textContent = 'Add an order';
-    document.getElementById('save-order-btn').textContent = 'Save order';
     populateOrderVendorSelect(); populateOrderStoreSelect();
+    if(window.resetOrderModalToAddMode) window.resetOrderModalToAddMode();
+    document.getElementById('add-order-form').reset();
     const dateInput = document.querySelector('#add-order-form [name="date"]');
     if(dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
     openModal('add-order-modal');
   });
   document.getElementById('dash-add-purchase-btn').addEventListener('click', ()=>{
-    if(window.__resetPurchaseEdit) window.__resetPurchaseEdit();
-    document.getElementById('add-purchase-form').reset();
-    document.getElementById('purchase-modal-title').textContent = 'Add a purchase';
-    document.getElementById('save-purchase-btn').textContent = 'Save purchase';
     populatePurchaseVendorSelect(); populatePurchaseStoreSelect();
+    if(window.resetPurchaseModalToAddMode) window.resetPurchaseModalToAddMode();
+    document.getElementById('add-purchase-form').reset();
     const dateInput = document.querySelector('#add-purchase-form [name="date"]');
     if(dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
     openModal('add-purchase-modal');
   });
   document.getElementById('dash-add-vendor-btn').addEventListener('click', ()=>{
-    if(window.__resetVendorEdit) window.__resetVendorEdit();
+    if(window.resetVendorModalToAddMode) window.resetVendorModalToAddMode();
     document.getElementById('add-vendor-form').reset();
-    document.getElementById('vendor-modal-title').textContent = 'Add a new vendor';
-    document.getElementById('save-vendor-btn').textContent = 'Save vendor';
     openModal('add-vendor-modal');
   });
 
@@ -1460,7 +1464,6 @@ function initDashboardControls(){
    ============================================================ */
 function initVendorsPage(){
   let vendors = getVendors();
-  let editingVendorId = null;
   const grid = document.getElementById('vendor-grid');
   const emptyState = document.getElementById('vendor-empty');
   const searchInput = document.getElementById('vendor-search');
@@ -1494,96 +1497,106 @@ function initVendorsPage(){
         <div class="vendor-card-top"><div><h3>${v.name}</h3><div class="cat">${v.category}</div></div>${stampHtml(v.status)}</div>
         <div class="stars">${stars(v.rating)}</div>
         <div class="meta-row"><span class="text-muted">${v.contact}</span><span class="spend">${formatCurrency(v.totalSpend)}</span></div>
-        <div class="card-actions">
-          <button type="button" class="icon-btn" data-action="edit-vendor" data-id="${v.id}">✎ Edit</button>
-          <button type="button" class="icon-btn danger" data-action="delete-vendor" data-id="${v.id}">🗑 Delete</button>
-        </div>
         <div class="vendor-detail">
           <div><strong>Email:</strong> ${v.email}</div>
           <div><strong>Phone:</strong> ${v.phone || '—'}</div>
           <div><strong>Vendor ID:</strong> <span class="mono">${v.id}</span></div>
           <div><strong>Total spend to date:</strong> ${formatCurrency(v.totalSpend)}</div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button type="button" class="btn-icon-edit edit-vendor-btn" data-id="${v.id}">Edit</button>
+            <button type="button" class="btn-icon-danger delete-vendor-inline-btn" data-id="${v.id}">Delete</button>
+          </div>
         </div>
       </div>`).join('');
   }
 
-  function openVendorModalForAdd(){
-    editingVendorId = null;
-    document.getElementById('add-vendor-form').reset();
+  function resetVendorModalToAddMode(){
     document.getElementById('vendor-modal-title').textContent = 'Add a new vendor';
-    document.getElementById('save-vendor-btn').textContent = 'Save vendor';
-    openModal('add-vendor-modal');
+    document.getElementById('vendor-submit-btn').textContent = 'Save vendor';
+    document.getElementById('vendor-edit-id').value = '';
+    document.getElementById('delete-vendor-btn').style.display = 'none';
   }
-  function openVendorModalForEdit(id){
-    const v = vendors.find(x=>x.id===id);
-    if(!v) return;
-    editingVendorId = id;
+
+  function openVendorEditModal(vendor){
     const form = document.getElementById('add-vendor-form');
-    form.querySelector('[name="name"]').value = v.name;
-    form.querySelector('[name="category"]').value = v.category;
-    form.querySelector('[name="contact"]').value = v.contact;
-    form.querySelector('[name="email"]').value = v.email;
-    form.querySelector('[name="phone"]').value = v.phone || '';
+    form.reset();
+    form.querySelector('[name="name"]').value = vendor.name || '';
+    form.querySelector('[name="category"]').value = vendor.category || '';
+    form.querySelector('[name="contact"]').value = vendor.contact || '';
+    form.querySelector('[name="email"]').value = vendor.email || '';
+    form.querySelector('[name="phone"]').value = vendor.phone || '';
+    document.getElementById('vendor-edit-id').value = vendor.id;
     document.getElementById('vendor-modal-title').textContent = 'Edit vendor';
-    document.getElementById('save-vendor-btn').textContent = 'Save changes';
+    document.getElementById('vendor-submit-btn').textContent = 'Save changes';
+    document.getElementById('delete-vendor-btn').style.display = 'inline-flex';
     openModal('add-vendor-modal');
   }
+
   function deleteVendorById(id){
-    const v = vendors.find(x=>x.id===id);
-    if(!v) return;
-    if(!confirm(`Delete vendor "${v.name}"? This can't be undone.`)) return;
-    vendors = vendors.filter(x=>x.id!==id);
+    const vendor = vendors.find(v=>v.id === id);
+    if(!vendor) return;
+    if(!confirm(`Delete vendor "${vendor.name}"? This cannot be undone.`)) return;
+    vendors = vendors.filter(v=>v.id !== id);
     saveVendors(vendors);
+    refreshCategoryOptions();
     render();
+    closeModal('add-vendor-modal');
+    refreshAll();
     populatePurchaseVendorSelect();
     populateOrderVendorSelect();
     populateOrderVendorFilter();
     populatePendingBillsVendorFilter();
-    refreshAll();
-    showToast('Vendor "' + v.name + '" deleted.');
+    showToast(`Vendor "${vendor.name}" deleted.`);
   }
 
   grid.addEventListener('click', (e)=>{
-    const actionBtn = e.target.closest('[data-action]');
-    if(actionBtn){
-      e.stopPropagation();
-      const id = actionBtn.dataset.id;
-      if(actionBtn.dataset.action === 'edit-vendor') openVendorModalForEdit(id);
-      if(actionBtn.dataset.action === 'delete-vendor') deleteVendorById(id);
-      return;
-    }
+    const editBtn = e.target.closest('.edit-vendor-btn');
+    if(editBtn){ e.stopPropagation(); const v = vendors.find(x=>x.id===editBtn.dataset.id); if(v) openVendorEditModal(v); return; }
+    const delBtn = e.target.closest('.delete-vendor-inline-btn');
+    if(delBtn){ e.stopPropagation(); deleteVendorById(delBtn.dataset.id); return; }
     const card = e.target.closest('.vendor-card');
     if(card) card.classList.toggle('expanded');
   });
   [searchInput, catFilter, statusFilter].forEach(el => el.addEventListener('input', render));
 
-  document.getElementById('add-vendor-btn').addEventListener('click', openVendorModalForAdd);
-  document.getElementById('cancel-add-vendor').addEventListener('click', ()=> { editingVendorId = null; closeModal('add-vendor-modal'); });
+  document.getElementById('add-vendor-btn').addEventListener('click', ()=>{ resetVendorModalToAddMode(); openModal('add-vendor-modal'); });
+  document.getElementById('cancel-add-vendor').addEventListener('click', ()=> closeModal('add-vendor-modal'));
+  document.getElementById('delete-vendor-btn').addEventListener('click', ()=>{
+    const id = document.getElementById('vendor-edit-id').value;
+    if(id) deleteVendorById(id);
+  });
 
   document.getElementById('add-vendor-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
-    const vendorData = {
-      name: fd.get('name').trim(), category: fd.get('category'),
-      contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim()
-    };
-    if(editingVendorId){
-      vendors = vendors.map(v => v.id === editingVendorId ? { ...v, ...vendorData } : v);
-      saveVendors(vendors);
-      refreshCategoryOptions();
-      render();
-      closeModal('add-vendor-modal');
-      e.target.reset();
-      refreshAll();
-      showToast('Vendor "' + vendorData.name + '" updated.');
-      populatePurchaseVendorSelect();
-      populateOrderVendorSelect();
-      populateOrderVendorFilter();
-      populatePendingBillsVendorFilter();
-      editingVendorId = null;
+    const editId = fd.get('editId');
+    if(editId){
+      const idx = vendors.findIndex(v=>v.id === editId);
+      if(idx !== -1){
+        vendors[idx] = {
+          ...vendors[idx],
+          name: fd.get('name').trim(), category: fd.get('category'),
+          contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim()
+        };
+        saveVendors(vendors);
+        refreshCategoryOptions();
+        render();
+        closeModal('add-vendor-modal');
+        e.target.reset();
+        refreshAll();
+        showToast('Vendor "' + vendors[idx].name + '" updated.');
+        populatePurchaseVendorSelect();
+        populateOrderVendorSelect();
+        populateOrderVendorFilter();
+        populatePendingBillsVendorFilter();
+      }
       return;
     }
-    const newVendor = { id: uid('V'), ...vendorData, rating:4.0, status:'active', totalSpend:0 };
+    const newVendor = {
+      id: uid('V'), name: fd.get('name').trim(), category: fd.get('category'),
+      contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim(),
+      rating:4.0, status:'active', totalSpend:0
+    };
     vendors.unshift(newVendor);
     saveVendors(vendors);
     refreshCategoryOptions();
@@ -1636,7 +1649,7 @@ function initVendorsPage(){
 
   render();
   window.__renderVendors = render; // exposed so the Add Purchase modal can refresh the dropdown list live
-  window.__resetVendorEdit = ()=> { editingVendorId = null; };
+  window.resetVendorModalToAddMode = resetVendorModalToAddMode;
 }
 
 /* ============================================================
@@ -1733,7 +1746,6 @@ function populateConsumableStoreFilter(){
    ============================================================ */
 function initStoresPage(){
   let stores = getStores();
-  let editingStoreId = null;
   const grid = document.getElementById('store-grid');
   const emptyState = document.getElementById('store-empty');
   const searchInput = document.getElementById('store-search');
@@ -1754,50 +1766,52 @@ function initStoresPage(){
         ${s.imageUrl ? `<img src="${s.imageUrl}" alt="${s.name}" style="width:100%; height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:12px;">` : ''}
         <div class="vendor-card-top"><div><h3>${s.name}</h3><div class="cat">${s.address || 'No address on file'}</div></div>${stampHtml(s.status)}</div>
         <div class="meta-row"><span class="text-muted">${s.contact || 'No contact set'}</span><span class="mono text-muted" style="font-size:11px;">${s.id}</span></div>
-        <div class="card-actions">
-          <button type="button" class="icon-btn" data-action="edit-store" data-id="${s.id}">✎ Edit</button>
-          <button type="button" class="icon-btn danger" data-action="delete-store" data-id="${s.id}">🗑 Delete</button>
-        </div>
         <div class="store-detail">
           <div><strong>Address:</strong> ${s.address || '—'}</div>
           <div><strong>Contact:</strong> ${s.contact || '—'}</div>
           <div><strong>Phone:</strong> ${s.phone || '—'}</div>
           <div><strong>Store ID:</strong> <span class="mono">${s.id}</span></div>
-          <div class="card-actions">
-            <button type="button" class="icon-btn" data-action="edit-store" data-id="${s.id}">✎ Edit</button>
-            <button type="button" class="icon-btn danger" data-action="delete-store" data-id="${s.id}">🗑 Delete</button>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button type="button" class="btn-icon-edit edit-store-btn" data-id="${s.id}">Edit</button>
+            <button type="button" class="btn-icon-danger delete-store-inline-btn" data-id="${s.id}">Delete</button>
           </div>
         </div>
       </div>`).join('');
   }
 
-  function openStoreModalForAdd(){
-    editingStoreId = null;
-    document.getElementById('add-store-form').reset();
+  function resetStoreModalToAddMode(){
     document.getElementById('store-modal-title').textContent = 'Add a new store';
-    document.getElementById('save-store-btn').textContent = 'Save store';
-    openModal('add-store-modal');
+    document.getElementById('store-submit-btn').textContent = 'Save store';
+    document.getElementById('store-edit-id').value = '';
+    document.getElementById('delete-store-btn').style.display = 'none';
   }
-  function openStoreModalForEdit(id){
-    const s = stores.find(x=>x.id===id);
-    if(!s) return;
-    editingStoreId = id;
+
+  function openStoreEditModal(store){
     const form = document.getElementById('add-store-form');
-    form.querySelector('[name="name"]').value = s.name;
-    form.querySelector('[name="address"]').value = s.address || '';
-    form.querySelector('[name="contact"]').value = s.contact || '';
-    form.querySelector('[name="phone"]').value = s.phone || '';
+    form.reset();
+    form.querySelector('[name="name"]').value = store.name || '';
+    form.querySelector('[name="address"]').value = store.address || '';
+    form.querySelector('[name="contact"]').value = store.contact || '';
+    form.querySelector('[name="phone"]').value = store.phone || '';
+    document.getElementById('store-edit-id').value = store.id;
     document.getElementById('store-modal-title').textContent = 'Edit store';
-    document.getElementById('save-store-btn').textContent = 'Save changes';
+    document.getElementById('store-submit-btn').textContent = 'Save changes';
+    document.getElementById('delete-store-btn').style.display = 'inline-flex';
+    const imageStatus = document.getElementById('store-image-status');
+    imageStatus.textContent = store.imageUrl ? 'Current photo will be kept unless you upload a new one.' : '';
+    imageStatus.className = 'upload-status';
     openModal('add-store-modal');
   }
+
   function deleteStoreById(id){
-    const s = stores.find(x=>x.id===id);
-    if(!s) return;
-    if(!confirm(`Delete store "${s.name}"? This can't be undone.`)) return;
-    stores = stores.filter(x=>x.id!==id);
+    const store = stores.find(s=>s.id === id);
+    if(!store) return;
+    if(!confirm(`Delete store "${store.name}"? This cannot be undone.`)) return;
+    stores = stores.filter(s=>s.id !== id);
     saveStores(stores);
     render();
+    closeModal('add-store-modal');
+    refreshAll();
     populatePurchaseStoreSelect();
     populateOrderStoreSelect();
     populateHistoryStoreFilter();
@@ -1807,72 +1821,76 @@ function initStoresPage(){
     populatePendingBillsStoreFilter();
     if(window.__renderOrders) window.__renderOrders();
     if(window.__renderConsumables) window.__renderConsumables();
-    refreshAll();
-    showToast('Store "' + s.name + '" deleted.');
+    showToast(`Store "${store.name}" deleted.`);
   }
 
   grid.addEventListener('click', (e)=>{
-    const actionBtn = e.target.closest('[data-action]');
-    if(actionBtn){
-      e.stopPropagation();
-      const id = actionBtn.dataset.id;
-      if(actionBtn.dataset.action === 'edit-store') openStoreModalForEdit(id);
-      if(actionBtn.dataset.action === 'delete-store') deleteStoreById(id);
-      return;
-    }
+    const editBtn = e.target.closest('.edit-store-btn');
+    if(editBtn){ e.stopPropagation(); const s = stores.find(x=>x.id===editBtn.dataset.id); if(s) openStoreEditModal(s); return; }
+    const delBtn = e.target.closest('.delete-store-inline-btn');
+    if(delBtn){ e.stopPropagation(); deleteStoreById(delBtn.dataset.id); return; }
     const card = e.target.closest('.store-card');
     if(card) card.classList.toggle('expanded');
   });
   [searchInput, statusFilter].forEach(el => el.addEventListener('input', render));
 
-  document.getElementById('add-store-btn').addEventListener('click', openStoreModalForAdd);
-  document.getElementById('cancel-add-store').addEventListener('click', ()=> { editingStoreId = null; closeModal('add-store-modal'); });
+  document.getElementById('add-store-btn').addEventListener('click', ()=>{ resetStoreModalToAddMode(); openModal('add-store-modal'); });
+  document.getElementById('cancel-add-store').addEventListener('click', ()=> closeModal('add-store-modal'));
+  document.getElementById('delete-store-btn').addEventListener('click', ()=>{
+    const id = document.getElementById('store-edit-id').value;
+    if(id) deleteStoreById(id);
+  });
 
   document.getElementById('add-store-form').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
+    const editId = fd.get('editId');
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const imageInput = document.getElementById('store-image-file');
     const imageStatus = document.getElementById('store-image-status');
-    let imageUrl = editingStoreId ? (stores.find(x=>x.id===editingStoreId)?.imageUrl || '') : '';
+    let imageUrl = editId ? (stores.find(s=>s.id===editId) || {}).imageUrl || '' : '';
     submitBtn.disabled = true;
     try{
       const imageFile = imageInput.files[0];
       if(imageFile) imageUrl = await uploadToCloudinary(imageFile, imageStatus);
     }catch(err){
       submitBtn.disabled = false;
-      showToast('Store photo failed to upload — saving the store without it.', 'error');
+      showToast('Store photo failed to upload — saving the store without a new photo.', 'error');
     }
-    const storeData = {
-      name: fd.get('name').trim(), address: fd.get('address').trim(),
-      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), imageUrl
-    };
 
-    if(editingStoreId){
-      const oldName = stores.find(x=>x.id===editingStoreId)?.name;
-      stores = stores.map(s => s.id === editingStoreId ? { ...s, ...storeData } : s);
-      saveStores(stores);
-      render();
-      closeModal('add-store-modal');
-      e.target.reset();
-      imageStatus.textContent = ''; imageStatus.className = 'upload-status';
-      submitBtn.disabled = false;
-      refreshAll();
-      showToast('Store "' + storeData.name + '" updated.');
-      populatePurchaseStoreSelect();
-      populateOrderStoreSelect();
-      populateHistoryStoreFilter();
-      populateConsumableStoreSelect();
-      populateConsumableStoreFilter();
-      populateOrderStoreFilter();
-      populatePendingBillsStoreFilter();
-      if(window.__renderOrders) window.__renderOrders();
-      if(window.__renderConsumables) window.__renderConsumables();
-      editingStoreId = null;
+    if(editId){
+      const idx = stores.findIndex(s=>s.id === editId);
+      if(idx !== -1){
+        stores[idx] = {
+          ...stores[idx],
+          name: fd.get('name').trim(), address: fd.get('address').trim(),
+          contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), imageUrl
+        };
+        saveStores(stores);
+        render();
+        closeModal('add-store-modal');
+        e.target.reset();
+        imageStatus.textContent = ''; imageStatus.className = 'upload-status';
+        submitBtn.disabled = false;
+        refreshAll();
+        showToast('Store "' + stores[idx].name + '" updated.');
+        populatePurchaseStoreSelect();
+        populateOrderStoreSelect();
+        populateHistoryStoreFilter();
+        populateConsumableStoreSelect();
+        populateConsumableStoreFilter();
+        populateOrderStoreFilter();
+        populatePendingBillsStoreFilter();
+        if(window.__renderOrders) window.__renderOrders();
+        if(window.__renderConsumables) window.__renderConsumables();
+      }
       return;
     }
 
-    const newStore = { id: uid('S'), ...storeData, status:'active' };
+    const newStore = {
+      id: uid('S'), name: fd.get('name').trim(), address: fd.get('address').trim(),
+      contact: fd.get('contact').trim(), phone: fd.get('phone').trim(), status:'active', imageUrl
+    };
     stores.unshift(newStore);
     saveStores(stores);
     render();
@@ -1927,7 +1945,7 @@ function initStoresPage(){
 
   render();
   window.__renderStores = render;
-  window.__resetStoreEdit = ()=> { editingStoreId = null; };
+  window.resetStoreModalToAddMode = resetStoreModalToAddMode;
 }
 
 /* ============================================================
@@ -1935,7 +1953,6 @@ function initStoresPage(){
    ============================================================ */
 function initHistoryPage(){
   let history = getHistory();
-  let editingPurchaseId = null;
   let sortKey = 'date', sortDir = 'desc';
   const searchInput = document.getElementById('history-search');
   const statusFilter = document.getElementById('filter-history-status');
@@ -1980,10 +1997,7 @@ function initHistoryPage(){
     tbody.innerHTML = filtered.map(h=>`
       <tr><td class="mono">${h.poNumber}</td><td class="cell-primary">${h.vendor}</td><td>${h.store||'—'}</td><td>${h.item}</td>
         <td>${h.department}</td><td>${formatDate(h.date)}</td><td class="num mono">${formatCurrency(h.amount)}</td><td>${stampHtml(h.status)}</td>
-        <td><div class="row-actions">
-          <button type="button" class="icon-btn" data-action="edit-purchase" data-id="${h.id}">✎</button>
-          <button type="button" class="icon-btn danger" data-action="delete-purchase" data-id="${h.id}">🗑</button>
-        </div></td></tr>
+        <td><button type="button" class="btn-icon-edit edit-purchase-btn" data-id="${h.id}">Edit</button><button type="button" class="btn-icon-danger delete-purchase-inline-btn" data-id="${h.id}">Delete</button></td></tr>
     `).join('');
     table.querySelectorAll('th.sortable').forEach(th=>{
       const arrow = th.querySelector('.arrow');
@@ -1999,6 +2013,57 @@ function initHistoryPage(){
   });
   [searchInput, statusFilter, storeFilter].forEach(el=>el.addEventListener('input', render));
 
+  tbody.addEventListener('click', (e)=>{
+    const editBtn = e.target.closest('.edit-purchase-btn');
+    if(editBtn){ const h = history.find(x=>x.id===editBtn.dataset.id); if(h) openPurchaseEditModal(h); return; }
+    const delBtn = e.target.closest('.delete-purchase-inline-btn');
+    if(delBtn){ deletePurchaseById(delBtn.dataset.id); return; }
+  });
+
+  function resetPurchaseModalToAddMode(){
+    document.getElementById('purchase-modal-title').textContent = 'Add a purchase';
+    document.getElementById('purchase-submit-btn').textContent = 'Save purchase';
+    document.getElementById('purchase-edit-id').value = '';
+    document.getElementById('delete-purchase-btn').style.display = 'none';
+  }
+
+  function openPurchaseEditModal(h){
+    populatePurchaseVendorSelect();
+    populatePurchaseStoreSelect();
+    const form = document.getElementById('add-purchase-form');
+    form.reset();
+    form.querySelector('[name="poNumber"]').value = h.poNumber || '';
+    form.querySelector('[name="vendor"]').value = h.vendor || '';
+    form.querySelector('[name="store"]').value = h.store || '';
+    form.querySelector('[name="item"]').value = h.item || '';
+    form.querySelector('[name="department"]').value = h.department || '';
+    form.querySelector('[name="amount"]').value = h.amount || '';
+    form.querySelector('[name="date"]').value = h.date || '';
+    form.querySelector('[name="status"]').value = h.status || 'completed';
+    document.getElementById('purchase-edit-id').value = h.id;
+    document.getElementById('purchase-modal-title').textContent = 'Edit purchase';
+    document.getElementById('purchase-submit-btn').textContent = 'Save changes';
+    document.getElementById('delete-purchase-btn').style.display = 'inline-flex';
+    openModal('add-purchase-modal');
+  }
+
+  function deletePurchaseById(id){
+    const h = history.find(x=>x.id === id);
+    if(!h) return;
+    if(!confirm(`Delete purchase ${h.poNumber}? This cannot be undone.`)) return;
+    history = history.filter(x=>x.id !== id);
+    saveHistory(history);
+    render();
+    closeModal('add-purchase-modal');
+    refreshAll();
+    showToast(`Purchase ${h.poNumber} deleted.`);
+  }
+
+  document.getElementById('delete-purchase-btn').addEventListener('click', ()=>{
+    const id = document.getElementById('purchase-edit-id').value;
+    if(id) deletePurchaseById(id);
+  });
+
   // ---- Add purchase (manual entry) ----
   populatePurchaseVendorSelect();
   populatePurchaseStoreSelect();
@@ -2006,63 +2071,46 @@ function initHistoryPage(){
   const purchaseForm = document.getElementById('add-purchase-form');
   const dateInput = purchaseForm.querySelector('[name="date"]');
 
-  function openPurchaseModalForAdd(){
-    editingPurchaseId = null;
+  addBtn.addEventListener('click', ()=>{
+    populatePurchaseVendorSelect();
+    populatePurchaseStoreSelect();
+    resetPurchaseModalToAddMode();
     purchaseForm.reset();
-    populatePurchaseVendorSelect();
-    populatePurchaseStoreSelect();
     if(!dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
-    document.getElementById('purchase-modal-title').textContent = 'Add a purchase';
-    document.getElementById('save-purchase-btn').textContent = 'Save purchase';
     openModal('add-purchase-modal');
-  }
-  function openPurchaseModalForEdit(id){
-    const h = history.find(x=>x.id===id);
-    if(!h) return;
-    editingPurchaseId = id;
-    populatePurchaseVendorSelect();
-    populatePurchaseStoreSelect();
-    purchaseForm.querySelector('[name="poNumber"]').value = h.poNumber;
-    purchaseForm.querySelector('[name="vendor"]').value = h.vendor;
-    purchaseForm.querySelector('[name="store"]').value = h.store;
-    purchaseForm.querySelector('[name="item"]').value = h.item;
-    purchaseForm.querySelector('[name="department"]').value = h.department;
-    purchaseForm.querySelector('[name="amount"]').value = h.amount;
-    purchaseForm.querySelector('[name="date"]').value = h.date;
-    purchaseForm.querySelector('[name="status"]').value = h.status;
-    document.getElementById('purchase-modal-title').textContent = 'Edit purchase';
-    document.getElementById('save-purchase-btn').textContent = 'Save changes';
-    openModal('add-purchase-modal');
-  }
-  function deletePurchaseById(id){
-    const h = history.find(x=>x.id===id);
-    if(!h) return;
-    if(!confirm(`Delete purchase "${h.poNumber}"? This can't be undone.`)) return;
-    history = history.filter(x=>x.id!==id);
-    saveHistory(history);
-    render();
-    renderDashboard();
-    refreshAll();
-    showToast('Purchase ' + h.poNumber + ' deleted.');
-  }
-
-  tbody.addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    if(btn.dataset.action === 'edit-purchase') openPurchaseModalForEdit(id);
-    if(btn.dataset.action === 'delete-purchase') deletePurchaseById(id);
   });
-
-  addBtn.addEventListener('click', openPurchaseModalForAdd);
-  document.getElementById('cancel-add-purchase').addEventListener('click', ()=> { editingPurchaseId = null; closeModal('add-purchase-modal'); });
+  document.getElementById('cancel-add-purchase').addEventListener('click', ()=> closeModal('add-purchase-modal'));
 
   purchaseForm.addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(purchaseForm);
+    const editId = fd.get('editId');
     const vendorValue = fd.get('vendor') === '__new__' ? 'Unlisted vendor' : fd.get('vendor');
     const storeValue = fd.get('store') === '__new__' ? 'Unlisted store' : fd.get('store');
-    const purchaseData = {
+
+    if(editId){
+      const idx = history.findIndex(h=>h.id === editId);
+      if(idx !== -1){
+        history[idx] = {
+          ...history[idx],
+          poNumber: fd.get('poNumber').trim(), vendor: vendorValue, store: storeValue,
+          item: fd.get('item').trim(), department: fd.get('department'),
+          amount: Number(fd.get('amount')), date: fd.get('date'), status: fd.get('status')
+        };
+        saveHistory(history);
+        populateHistoryStoreFilter();
+        render();
+        renderDashboard();
+        closeModal('add-purchase-modal');
+        purchaseForm.reset();
+        refreshAll();
+        showToast('Purchase ' + history[idx].poNumber + ' updated.');
+      }
+      return;
+    }
+
+    const newPurchase = {
+      id: uid('H'),
       poNumber: fd.get('poNumber').trim(),
       vendor: vendorValue,
       store: storeValue,
@@ -2072,22 +2120,6 @@ function initHistoryPage(){
       date: fd.get('date'),
       status: fd.get('status')
     };
-
-    if(editingPurchaseId){
-      history = history.map(h => h.id === editingPurchaseId ? { ...h, ...purchaseData } : h);
-      saveHistory(history);
-      populateHistoryStoreFilter();
-      render();
-      renderDashboard();
-      closeModal('add-purchase-modal');
-      purchaseForm.reset();
-      refreshAll();
-      showToast('Purchase ' + purchaseData.poNumber + ' updated.');
-      editingPurchaseId = null;
-      return;
-    }
-
-    const newPurchase = { id: uid('H'), ...purchaseData };
     history.unshift(newPurchase);
     saveHistory(history);
     populateHistoryStoreFilter();
@@ -2133,7 +2165,7 @@ function initHistoryPage(){
 
   render();
   window.__renderHistory = render;
-  window.__resetPurchaseEdit = ()=> { editingPurchaseId = null; };
+  window.resetPurchaseModalToAddMode = resetPurchaseModalToAddMode;
 }
 
 /* ============================================================
@@ -2141,7 +2173,6 @@ function initHistoryPage(){
    ============================================================ */
 function initOrdersPage(){
   let orders = getOrders();
-  let editingOrderId = null;
   let sortKey = 'date', sortDir = 'desc';
   const idFilter = document.getElementById('order-search-id');
   const vendorFilter = document.getElementById('filter-order-vendor');
@@ -2205,10 +2236,7 @@ function initOrdersPage(){
         <td class="num mono">${o.quantity}</td><td>${formatDate(o.date)}</td>
         <td class="num mono">${formatINR(o.amount)}</td><td>${stampHtml(o.status)}</td>
         <td>${stampHtml(o.paymentStatus || 'unpaid')}</td><td>${docLinks(o)}</td>
-        <td><div class="row-actions">
-          <button type="button" class="icon-btn" data-action="edit-order" data-id="${o.id}">✎</button>
-          <button type="button" class="icon-btn danger" data-action="delete-order" data-id="${o.id}">🗑</button>
-        </div></td></tr>
+        <td><button type="button" class="btn-icon-edit edit-order-btn" data-id="${o.id}">Edit</button><button type="button" class="btn-icon-danger delete-order-inline-btn" data-id="${o.id}">Delete</button></td></tr>
     `).join('');
     table.querySelectorAll('th.sortable').forEach(th=>{
       const arrow = th.querySelector('.arrow');
@@ -2228,7 +2256,66 @@ function initOrdersPage(){
     render();
   });
 
-  // ---- Add / Edit order (manual entry) ----
+  tbody.addEventListener('click', (e)=>{
+    const editBtn = e.target.closest('.edit-order-btn');
+    if(editBtn){ const o = orders.find(x=>x.id===editBtn.dataset.id); if(o) openOrderEditModal(o); return; }
+    const delBtn = e.target.closest('.delete-order-inline-btn');
+    if(delBtn){ deleteOrderById(delBtn.dataset.id); return; }
+  });
+
+  function resetOrderModalToAddMode(){
+    document.getElementById('order-modal-title').textContent = 'Add an order';
+    document.getElementById('save-order-btn').textContent = 'Save order';
+    document.getElementById('order-edit-id').value = '';
+    document.getElementById('delete-order-btn').style.display = 'none';
+  }
+
+  function openOrderEditModal(o){
+    populateOrderVendorSelect();
+    populateOrderStoreSelect();
+    const form = document.getElementById('add-order-form');
+    form.reset();
+    form.querySelector('[name="orderNumber"]').value = o.orderNumber || '';
+    form.querySelector('[name="vendor"]').value = o.vendor || '';
+    form.querySelector('[name="store"]').value = o.store || '';
+    form.querySelector('[name="item"]').value = o.item || '';
+    form.querySelector('[name="quantity"]').value = o.quantity || '';
+    form.querySelector('[name="amount"]').value = o.amount || '';
+    form.querySelector('[name="date"]').value = o.date || '';
+    form.querySelector('[name="status"]').value = o.status || 'placed';
+    form.querySelector('[name="paymentStatus"]').value = o.paymentStatus || 'unpaid';
+    document.getElementById('order-edit-id').value = o.id;
+    document.getElementById('order-modal-title').textContent = 'Edit order';
+    document.getElementById('save-order-btn').textContent = 'Save changes';
+    document.getElementById('delete-order-btn').style.display = 'inline-flex';
+    const invoiceStatusEl = document.getElementById('order-invoice-status');
+    const proofStatusEl = document.getElementById('order-proof-status');
+    invoiceStatusEl.textContent = o.invoiceUrl ? 'Current invoice will be kept unless you upload a new one.' : '';
+    invoiceStatusEl.className = 'upload-status';
+    proofStatusEl.textContent = o.proofUrl ? 'Current proof will be kept unless you upload a new one.' : '';
+    proofStatusEl.className = 'upload-status';
+    openModal('add-order-modal');
+  }
+
+  function deleteOrderById(id){
+    const o = orders.find(x=>x.id === id);
+    if(!o) return;
+    if(!confirm(`Delete order ${o.orderNumber}? This cannot be undone.`)) return;
+    orders = orders.filter(x=>x.id !== id);
+    saveOrders(orders);
+    render();
+    closeModal('add-order-modal');
+    refreshAll();
+    if(window.__renderPendingBills) window.__renderPendingBills();
+    showToast(`Order ${o.orderNumber} deleted.`);
+  }
+
+  document.getElementById('delete-order-btn').addEventListener('click', ()=>{
+    const id = document.getElementById('order-edit-id').value;
+    if(id) deleteOrderById(id);
+  });
+
+  // ---- Add order (manual entry) ----
   populateOrderVendorSelect();
   populateOrderStoreSelect();
   const addBtn = document.getElementById('add-order-btn');
@@ -2240,70 +2327,26 @@ function initOrdersPage(){
   const invoiceStatus = document.getElementById('order-invoice-status');
   const proofStatus = document.getElementById('order-proof-status');
 
-  function openOrderModalForAdd(){
-    editingOrderId = null;
+  addBtn.addEventListener('click', ()=>{
+    populateOrderVendorSelect();
+    populateOrderStoreSelect();
+    resetOrderModalToAddMode();
     orderForm.reset();
-    populateOrderVendorSelect();
-    populateOrderStoreSelect();
     if(!dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
-    document.getElementById('order-modal-title').textContent = 'Add an order';
-    saveBtn.textContent = 'Save order';
     openModal('add-order-modal');
-  }
-  function openOrderModalForEdit(id){
-    const o = orders.find(x=>x.id===id);
-    if(!o) return;
-    editingOrderId = id;
-    populateOrderVendorSelect();
-    populateOrderStoreSelect();
-    orderForm.querySelector('[name="orderNumber"]').value = o.orderNumber;
-    orderForm.querySelector('[name="vendor"]').value = o.vendor;
-    orderForm.querySelector('[name="store"]').value = o.store;
-    orderForm.querySelector('[name="item"]').value = o.item;
-    orderForm.querySelector('[name="quantity"]').value = o.quantity;
-    orderForm.querySelector('[name="amount"]').value = o.amount;
-    orderForm.querySelector('[name="date"]').value = o.date;
-    orderForm.querySelector('[name="status"]').value = o.status;
-    orderForm.querySelector('[name="paymentStatus"]').value = o.paymentStatus || 'unpaid';
-    document.getElementById('order-modal-title').textContent = 'Edit order';
-    saveBtn.textContent = 'Save changes';
-    openModal('add-order-modal');
-  }
-  function deleteOrderById(id){
-    const o = orders.find(x=>x.id===id);
-    if(!o) return;
-    if(!confirm(`Delete order "${o.orderNumber}"? This can't be undone.`)) return;
-    orders = orders.filter(x=>x.id!==id);
-    saveOrders(orders);
-    populateOrderVendorFilter();
-    populateOrderStoreFilter();
-    render();
-    renderDashboard();
-    if(window.__renderPendingBills) window.__renderPendingBills();
-    refreshAll();
-    showToast('Order ' + o.orderNumber + ' deleted.');
-  }
-
-  tbody.addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    if(btn.dataset.action === 'edit-order') openOrderModalForEdit(id);
-    if(btn.dataset.action === 'delete-order') deleteOrderById(id);
   });
-
-  addBtn.addEventListener('click', openOrderModalForAdd);
-  document.getElementById('cancel-add-order').addEventListener('click', ()=> { editingOrderId = null; closeModal('add-order-modal'); });
+  document.getElementById('cancel-add-order').addEventListener('click', ()=> closeModal('add-order-modal'));
 
   orderForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const fd = new FormData(orderForm);
+    const editId = fd.get('editId');
     const vendorValue = fd.get('vendor') === '__new__' ? 'Unlisted vendor' : fd.get('vendor');
     const storeValue = fd.get('store') === '__new__' ? 'Unlisted store' : fd.get('store');
-    const existing = editingOrderId ? orders.find(x=>x.id===editingOrderId) : null;
 
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
+    const existing = editId ? orders.find(o=>o.id===editId) : null;
     let invoiceUrl = existing ? (existing.invoiceUrl || '') : '';
     let proofUrl = existing ? (existing.proofUrl || '') : '';
     try{
@@ -2316,10 +2359,37 @@ function initOrdersPage(){
       showToast('Could not upload one of the files — check Cloudinary setup. Saving the order without it.', 'error');
     }finally{
       saveBtn.disabled = false;
-      saveBtn.textContent = editingOrderId ? 'Save changes' : 'Save order';
+      saveBtn.textContent = editId ? 'Save changes' : 'Save order';
     }
 
-    const orderData = {
+    if(editId){
+      const idx = orders.findIndex(o=>o.id === editId);
+      if(idx !== -1){
+        orders[idx] = {
+          ...orders[idx],
+          orderNumber: fd.get('orderNumber').trim(), vendor: vendorValue, store: storeValue,
+          item: fd.get('item').trim(), quantity: Number(fd.get('quantity')), amount: Number(fd.get('amount')),
+          date: fd.get('date'), status: fd.get('status'), paymentStatus: fd.get('paymentStatus'),
+          invoiceUrl, proofUrl
+        };
+        saveOrders(orders);
+        populateOrderVendorFilter();
+        populateOrderStoreFilter();
+        render();
+        renderDashboard();
+        if(window.__renderPendingBills) window.__renderPendingBills();
+        closeModal('add-order-modal');
+        orderForm.reset();
+        invoiceStatus.textContent = ''; invoiceStatus.className = 'upload-status';
+        proofStatus.textContent = ''; proofStatus.className = 'upload-status';
+        refreshAll();
+        showToast('Order ' + orders[idx].orderNumber + ' updated.');
+      }
+      return;
+    }
+
+    const newOrder = {
+      id: uid('O'),
       orderNumber: fd.get('orderNumber').trim(),
       vendor: vendorValue,
       store: storeValue,
@@ -2331,26 +2401,6 @@ function initOrdersPage(){
       paymentStatus: fd.get('paymentStatus'),
       invoiceUrl, proofUrl
     };
-
-    if(editingOrderId){
-      orders = orders.map(o => o.id === editingOrderId ? { ...o, ...orderData } : o);
-      saveOrders(orders);
-      populateOrderVendorFilter();
-      populateOrderStoreFilter();
-      render();
-      renderDashboard();
-      if(window.__renderPendingBills) window.__renderPendingBills();
-      closeModal('add-order-modal');
-      orderForm.reset();
-      invoiceStatus.textContent = ''; invoiceStatus.className = 'upload-status';
-      proofStatus.textContent = ''; proofStatus.className = 'upload-status';
-      refreshAll();
-      showToast('Order ' + orderData.orderNumber + ' updated.');
-      editingOrderId = null;
-      return;
-    }
-
-    const newOrder = { id: uid('O'), ...orderData };
     orders.unshift(newOrder);
     saveOrders(orders);
     populateOrderVendorFilter();
@@ -2406,7 +2456,7 @@ function initOrdersPage(){
 
   render();
   window.__renderOrders = render;
-  window.__resetOrderEdit = ()=> { editingOrderId = null; };
+  window.resetOrderModalToAddMode = resetOrderModalToAddMode;
 }
 
 /* ============================================================
@@ -2502,7 +2552,6 @@ function initPendingBillsPage(){
    ============================================================ */
 function initConsumablesPage(){
   let consumables = getConsumables();
-  let editingConsumableId = null;
   const searchInput = document.getElementById('consumables-search');
   const storeFilter = document.getElementById('filter-consumables-store');
   const groupsEl = document.getElementById('consumables-groups');
@@ -2537,10 +2586,7 @@ function initConsumablesPage(){
                 return `<tr><td class="cell-primary">${c.item}</td><td>${c.category||'—'}</td>
                   <td class="num mono">${c.quantity}</td><td>${c.unit||'—'}</td><td class="num mono">${c.reorderLevel ?? '—'}</td>
                   <td>${low ? '<span class="stamp stamp-unpaid">Reorder</span>' : '<span class="stamp stamp-paid">OK</span>'}</td>
-                  <td><div class="row-actions">
-                    <button type="button" class="icon-btn" data-action="edit-consumable" data-id="${c.id}">✎</button>
-                    <button type="button" class="icon-btn danger" data-action="delete-consumable" data-id="${c.id}">🗑</button>
-                  </div></td></tr>`;
+                  <td><button type="button" class="btn-icon-edit edit-consumable-btn" data-id="${c.id}">Edit</button><button type="button" class="btn-icon-danger delete-consumable-inline-btn" data-id="${c.id}">Delete</button></td></tr>`;
               }).join('')}
             </tbody>
           </table>
@@ -2549,75 +2595,91 @@ function initConsumablesPage(){
   }
 
   groupsEl.addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    if(btn.dataset.action === 'edit-consumable') openConsumableModalForEdit(id);
-    if(btn.dataset.action === 'delete-consumable') deleteConsumableById(id);
+    const editBtn = e.target.closest('.edit-consumable-btn');
+    if(editBtn){ const c = consumables.find(x=>x.id===editBtn.dataset.id); if(c) openConsumableEditModal(c); return; }
+    const delBtn = e.target.closest('.delete-consumable-inline-btn');
+    if(delBtn){ deleteConsumableById(delBtn.dataset.id); return; }
+  });
+
+  function resetConsumableModalToAddMode(){
+    document.getElementById('consumable-modal-title').textContent = 'Add a consumable';
+    document.getElementById('consumable-submit-btn').textContent = 'Save consumable';
+    document.getElementById('consumable-edit-id').value = '';
+    document.getElementById('delete-consumable-btn').style.display = 'none';
+  }
+
+  function openConsumableEditModal(c){
+    populateConsumableStoreSelect();
+    const form = document.getElementById('add-consumable-form');
+    form.reset();
+    form.querySelector('[name="store"]').value = c.store || '';
+    form.querySelector('[name="item"]').value = c.item || '';
+    form.querySelector('[name="category"]').value = c.category || '';
+    form.querySelector('[name="quantity"]').value = c.quantity ?? '';
+    form.querySelector('[name="unit"]').value = c.unit || '';
+    form.querySelector('[name="reorderLevel"]').value = c.reorderLevel ?? '';
+    document.getElementById('consumable-edit-id').value = c.id;
+    document.getElementById('consumable-modal-title').textContent = 'Edit consumable';
+    document.getElementById('consumable-submit-btn').textContent = 'Save changes';
+    document.getElementById('delete-consumable-btn').style.display = 'inline-flex';
+    openModal('add-consumable-modal');
+  }
+
+  function deleteConsumableById(id){
+    const c = consumables.find(x=>x.id === id);
+    if(!c) return;
+    if(!confirm(`Delete "${c.item}" from ${c.store}? This cannot be undone.`)) return;
+    consumables = consumables.filter(x=>x.id !== id);
+    saveConsumables(consumables);
+    render();
+    closeModal('add-consumable-modal');
+    refreshAll();
+    showToast(`"${c.item}" deleted.`);
+  }
+
+  document.getElementById('delete-consumable-btn').addEventListener('click', ()=>{
+    const id = document.getElementById('consumable-edit-id').value;
+    if(id) deleteConsumableById(id);
   });
 
   [searchInput, storeFilter].forEach(el=>el.addEventListener('input', render));
 
-  function openConsumableModalForAdd(){
-    editingConsumableId = null;
+  document.getElementById('add-consumable-btn').addEventListener('click', ()=>{
+    populateConsumableStoreSelect();
+    resetConsumableModalToAddMode();
     document.getElementById('add-consumable-form').reset();
-    populateConsumableStoreSelect();
-    document.getElementById('consumable-modal-title').textContent = 'Add a consumable';
-    document.getElementById('save-consumable-btn').textContent = 'Save consumable';
     openModal('add-consumable-modal');
-  }
-  function openConsumableModalForEdit(id){
-    const c = consumables.find(x=>x.id===id);
-    if(!c) return;
-    editingConsumableId = id;
-    populateConsumableStoreSelect();
-    const form = document.getElementById('add-consumable-form');
-    form.querySelector('[name="store"]').value = c.store;
-    form.querySelector('[name="item"]').value = c.item;
-    form.querySelector('[name="category"]').value = c.category || '';
-    form.querySelector('[name="quantity"]').value = c.quantity;
-    form.querySelector('[name="unit"]').value = c.unit || '';
-    form.querySelector('[name="reorderLevel"]').value = c.reorderLevel || 0;
-    document.getElementById('consumable-modal-title').textContent = 'Edit consumable';
-    document.getElementById('save-consumable-btn').textContent = 'Save changes';
-    openModal('add-consumable-modal');
-  }
-  function deleteConsumableById(id){
-    const c = consumables.find(x=>x.id===id);
-    if(!c) return;
-    if(!confirm(`Delete "${c.item}" from ${c.store}? This can't be undone.`)) return;
-    consumables = consumables.filter(x=>x.id!==id);
-    saveConsumables(consumables);
-    render();
-    refreshAll();
-    showToast('"' + c.item + '" deleted from ' + c.store + '.');
-  }
-
-  document.getElementById('add-consumable-btn').addEventListener('click', openConsumableModalForAdd);
-  document.getElementById('cancel-add-consumable').addEventListener('click', ()=> { editingConsumableId = null; closeModal('add-consumable-modal'); });
+  });
+  document.getElementById('cancel-add-consumable').addEventListener('click', ()=> closeModal('add-consumable-modal'));
 
   document.getElementById('add-consumable-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
+    const editId = fd.get('editId');
     const storeValue = fd.get('store');
-    const itemData = {
-      store: storeValue, item: fd.get('item').trim(), category: fd.get('category').trim(),
-      quantity: Number(fd.get('quantity')), unit: fd.get('unit').trim(), reorderLevel: Number(fd.get('reorderLevel')) || 0
-    };
 
-    if(editingConsumableId){
-      consumables = consumables.map(c => c.id === editingConsumableId ? { ...c, ...itemData } : c);
-      saveConsumables(consumables);
-      render();
-      closeModal('add-consumable-modal');
-      e.target.reset();
-      refreshAll();
-      showToast('"' + itemData.item + '" updated.');
-      editingConsumableId = null;
+    if(editId){
+      const idx = consumables.findIndex(c=>c.id === editId);
+      if(idx !== -1){
+        consumables[idx] = {
+          ...consumables[idx],
+          store: storeValue, item: fd.get('item').trim(), category: fd.get('category').trim(),
+          quantity: Number(fd.get('quantity')), unit: fd.get('unit').trim(), reorderLevel: Number(fd.get('reorderLevel')) || 0
+        };
+        saveConsumables(consumables);
+        render();
+        closeModal('add-consumable-modal');
+        e.target.reset();
+        refreshAll();
+        showToast('"' + consumables[idx].item + '" updated.');
+      }
       return;
     }
 
-    const newItem = { id: uid('C'), ...itemData };
+    const newItem = {
+      id: uid('C'), store: storeValue, item: fd.get('item').trim(), category: fd.get('category').trim(),
+      quantity: Number(fd.get('quantity')), unit: fd.get('unit').trim(), reorderLevel: Number(fd.get('reorderLevel')) || 0
+    };
     consumables.unshift(newItem);
     saveConsumables(consumables);
     render();
@@ -2653,6 +2715,7 @@ function initConsumablesPage(){
 
   render();
   window.__renderConsumables = render;
+  window.resetConsumableModalToAddMode = resetConsumableModalToAddMode;
 }
 
 /* ============================================================
