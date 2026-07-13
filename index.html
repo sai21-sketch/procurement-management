@@ -986,8 +986,8 @@ function formatDate(iso){ const d = new Date(iso); return d.toLocaleDateString('
    localStorage only (nothing breaks — it just won't sync across devices).
    ============================================================ */
 const SUPABASE_CONFIG = {
-  url: 'https://smidiuymojbbrtsgvhje.supabase.co',     // e.g. https://abcxyzproject.supabase.co
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaWRpdXltb2piYnJ0c2d2aGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NzYyNDUsImV4cCI6MjA5OTI1MjI0NX0.Rn5_MduWQnEQsSiYePNwkyCxN34bNgWnmVUMJCE_ty4'     // Settings → API → anon public
+  url: 'YOUR_SUPABASE_PROJECT_URL',     // e.g. https://abcxyzproject.supabase.co
+  anonKey: 'YOUR_SUPABASE_ANON_KEY'     // Settings → API → anon public
 };
 const CLOUD_ENABLED = SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_PROJECT_URL' && SUPABASE_CONFIG.anonKey !== 'YOUR_SUPABASE_ANON_KEY';
 const cloud = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
@@ -1075,8 +1075,8 @@ async function bootstrapFromCloud(){
    3. Copy your Cloud name (shown on the Cloudinary dashboard) below
    ============================================================ */
 const CLOUDINARY_CONFIG = {
-  cloudName: 'h5dhgxvn',       // e.g. 'dabc12345'
-  uploadPreset: 'ash-procurement'  // an unsigned upload preset from your Cloudinary settings
+  cloudName: 'YOUR_CLOUD_NAME',       // e.g. 'dabc12345'
+  uploadPreset: 'YOUR_UPLOAD_PRESET'  // an unsigned upload preset from your Cloudinary settings
 };
 async function uploadToCloudinary(file, statusEl){
   if(!file) return '';
