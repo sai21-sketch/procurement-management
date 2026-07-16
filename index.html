@@ -728,10 +728,30 @@ table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
           <label>Category <span class="req">*</span></label>
           <select name="category" required>
             <option value="">Select…</option>
-            <option>Office Supplies</option><option>Hardware & IT</option><option>Facilities</option>
-            <option>Shipping & Logistics</option><option>Marketing & Print</option><option>Software Licensing</option>
-            <option>Hospitality</option><option>Other</option>
+            <option>DT Labels</option>
+            <option>Barcode Printer</option>
+            <option>Printers</option>
+            <option>Delivery Bags</option>
+            <option>Paper Bags</option>
+            <option>Tshirt</option>
+            <option>Corrugated Packaging Boxes</option>
+            <option>Pallets</option>
+            <option>Racks</option>
+            <option>PP Bins</option>
+            <option>Material Handling Equipment</option>
+            <option>Warehouse Trolleys</option>
+            <option>Ice Gel Packs</option>
+            <option>Desktop (Rent)</option>
+            <option>CCTV</option>
+            <option>CCTV Technician</option>
+            <option>UPS</option>
+            <option>DG Rent</option>
+            <option>Other</option>
           </select>
+        </div>
+        <div class="form-field" id="vendor-other-category-field" style="display:none;">
+          <label>Specify category <span class="req">*</span></label>
+          <input type="text" name="otherCategory" placeholder="Type the product/category name">
         </div>
         <div class="form-field">
           <label>Primary contact <span class="req">*</span></label>
@@ -1533,22 +1553,44 @@ function initVendorsPage(){
       </div>`).join('');
   }
 
+  function syncVendorOtherCategoryField(){
+    const select = document.querySelector('#add-vendor-form [name="category"]');
+    const field = document.getElementById('vendor-other-category-field');
+    const input = document.querySelector('#add-vendor-form [name="otherCategory"]');
+    const isOther = select.value === 'Other';
+    field.style.display = isOther ? '' : 'none';
+    input.required = isOther;
+    if(!isOther) input.value = '';
+  }
+  document.querySelector('#add-vendor-form [name="category"]').addEventListener('change', syncVendorOtherCategoryField);
+
   function resetVendorModalToAddMode(){
     document.getElementById('vendor-modal-title').textContent = 'Add a new vendor';
     document.getElementById('vendor-submit-btn').textContent = 'Save vendor';
     document.getElementById('vendor-edit-id').value = '';
     document.getElementById('delete-vendor-btn').style.display = 'none';
     const form = document.getElementById('add-vendor-form');
+    form.reset();
     form.querySelector('[name="status"]').value = 'active';
     form.querySelector('[name="rating"]').value = 4.0;
     form.querySelector('[name="totalSpend"]').value = 0;
+    syncVendorOtherCategoryField();
   }
+
+  const FIXED_VENDOR_CATEGORIES = ['DT Labels','Barcode Printer','Printers','Delivery Bags','Paper Bags','Tshirt','Corrugated Packaging Boxes','Pallets','Racks','PP Bins','Material Handling Equipment','Warehouse Trolleys','Ice Gel Packs','Desktop (Rent)','CCTV','CCTV Technician','UPS','DG Rent'];
 
   function openVendorEditModal(vendor){
     const form = document.getElementById('add-vendor-form');
     form.reset();
     form.querySelector('[name="name"]').value = vendor.name || '';
-    form.querySelector('[name="category"]').value = vendor.category || '';
+    const isKnownCategory = FIXED_VENDOR_CATEGORIES.includes(vendor.category);
+    if(vendor.category && !isKnownCategory){
+      form.querySelector('[name="category"]').value = 'Other';
+      form.querySelector('[name="otherCategory"]').value = vendor.category;
+    } else {
+      form.querySelector('[name="category"]').value = vendor.category || '';
+    }
+    syncVendorOtherCategoryField();
     form.querySelector('[name="contact"]').value = vendor.contact || '';
     form.querySelector('[name="email"]').value = vendor.email || '';
     form.querySelector('[name="phone"]').value = vendor.phone || '';
@@ -1600,12 +1642,15 @@ function initVendorsPage(){
     e.preventDefault();
     const fd = new FormData(e.target);
     const editId = fd.get('editId');
+    const resolvedCategory = fd.get('category') === 'Other'
+      ? (fd.get('otherCategory') || '').trim() || 'Other'
+      : fd.get('category');
     if(editId){
       const idx = vendors.findIndex(v=>v.id === editId);
       if(idx !== -1){
         vendors[idx] = {
           ...vendors[idx],
-          name: fd.get('name').trim(), category: fd.get('category'),
+          name: fd.get('name').trim(), category: resolvedCategory,
           contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim(),
           status: fd.get('status') || 'active',
           rating: fd.get('rating') !== '' ? Number(fd.get('rating')) : (vendors[idx].rating != null ? vendors[idx].rating : 4.0),
@@ -1626,7 +1671,7 @@ function initVendorsPage(){
       return;
     }
     const newVendor = {
-      id: uid('V'), name: fd.get('name').trim(), category: fd.get('category'),
+      id: uid('V'), name: fd.get('name').trim(), category: resolvedCategory,
       contact: fd.get('contact').trim(), email: fd.get('email').trim(), phone: fd.get('phone').trim(),
       rating: fd.get('rating') !== '' ? Number(fd.get('rating')) : 4.0,
       status: fd.get('status') || 'active',
